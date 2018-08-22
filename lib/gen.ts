@@ -36,8 +36,6 @@ export class GenConfig {
   camelCase?: boolean = false;
   /** gen type */
   type?: 'ts' | 'js' = 'ts';
-  /** route filter */
-  filter?: (route: RouteMetadataType) => boolean;
 }
 
 function genDefaultTemplate(sdkDir: string, templatePath: string) {
