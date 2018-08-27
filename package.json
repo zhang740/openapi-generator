@@ -1,6 +1,6 @@
 {
   "name": "api-gensdk",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -29,14 +29,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zhang740/egg-controller-meta.git"
+    "url": "git+https://github.com/zhang740/api-gensdk.git"
   },
   "author": "zhang740",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zhang740/egg-controller-meta/issues"
+    "url": "https://github.com/zhang740/api-gensdk/issues"
   },
-  "homepage": "https://github.com/zhang740/egg-controller-meta#readme",
+  "homepage": "https://github.com/zhang740/api-gensdk#readme",
   "dependencies": {
     "@types/nunjucks": "^3.1.0",
     "nunjucks": "^3.1.3",
