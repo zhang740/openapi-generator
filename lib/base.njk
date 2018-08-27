@@ -1,26 +1,28 @@
 import * as qs from 'query-string';
 
-export function joinQuery(data: { [x: string]: any }): string {
+export function joinQuery(data{{ ": { [x: string]: any }" if genType === "ts" }}): string {
   const s = qs.stringify(data, { arrayFormat: 'bracket' });
   return s ? '?' + s : s;
 }
 
+{% if genType === "ts" %}
 export interface RequestProps {
   method?: 'get' | 'post' | 'put' | 'delete';
   url: string;
   data?: any;
 }
+{% endif %}
 
 export default class Base {
-  protected async request(props: RequestProps) {
+  protected async request(props{{ ": RequestProps" if genType === "ts" }}) {
     let url = props.url;
-    let body: any;
+    let body{{ ": any" if genType === "ts" }};
     if ((props.method === 'get' || props.method === 'delete') && props.data) {
       data = props.data;
     } else {
       url += joinQuery(props.data);
     }
-    const fetchOpt: Request = {
+    const fetchOpt{{ ": Request" if genType === "ts" }} = {
       url,
       method: props.method,
     };

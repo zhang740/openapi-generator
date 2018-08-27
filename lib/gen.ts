@@ -38,22 +38,27 @@ export class GenConfig {
   type?: 'ts' | 'js' = 'ts';
 }
 
-function genDefaultTemplate(sdkDir: string, templatePath: string) {
-  templatePath = templatePath || path.join(sdkDir, 'sdk.njk');
+function genDefaultTemplate(config: GenConfig) {
+  const templatePath = config.templatePath || path.join(config.sdkDir, 'sdk.njk');
   if (!fs.existsSync(templatePath)) {
     console.log(`[genAPISDK] Not found template! ${templatePath}`);
     try {
       fs.writeFileSync(templatePath, fs.readFileSync(path.join(__dirname, 'sdk.njk')));
 
-      const baseServiceFile = path.join(path.parse(templatePath).dir, 'base.ts');
+      const baseServiceFile = path.join(path.parse(templatePath).dir, `base.${config.type}`);
       if (!fs.existsSync(baseServiceFile)) {
-        fs.writeFileSync(baseServiceFile, fs.readFileSync(path.join(__dirname, 'base.njk')));
+        const fileContent = nunjucks.renderString(
+          fs.readFileSync(path.join(__dirname, 'base.njk'), 'utf-8'), {
+            genType: config.type,
+          });
+        fs.writeFileSync(baseServiceFile, fileContent);
       }
     } catch (error) {
       console.log('[genAPISDK] Write default template error!', error);
       return;
     }
   }
+  return templatePath;
 }
 
 /**
@@ -64,11 +69,11 @@ function genDefaultTemplate(sdkDir: string, templatePath: string) {
  */
 export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
   config = { ...new GenConfig, ...config || {} };
-  let { templatePath, sdkDir } = config;
+  const { sdkDir } = config;
 
   mkdir(sdkDir);
 
-  genDefaultTemplate(sdkDir, templatePath);
+  const templatePath = genDefaultTemplate(config);
 
   // 模版中函数支持的变量
   const metadata: {
@@ -90,7 +95,8 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
 
     const fileContent = nunjucks.renderString(fileTemplate, {
       genType: config.type,
-      className: typeName[0].toLowerCase() + typeName.slice(1),
+      className: typeName,
+      instanceName: typeName[0].toLowerCase() + typeName.slice(1),
       methodMetadata: metadata[className],
     });
 
