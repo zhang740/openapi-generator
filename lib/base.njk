@@ -1,6 +1,6 @@
 import * as qs from 'query-string';
 
-export function joinQuery(data{{ ": { [x: string]: any }" if genType === "ts" }}): string {
+export function joinQuery(data{{ ": { [x: string]: any }" if genType === "ts" }}){{ ": string" if genType === "ts" }} {
   const s = qs.stringify(data, { arrayFormat: 'bracket' });
   return s ? '?' + s : s;
 }
@@ -14,7 +14,7 @@ export interface RequestProps {
 {% endif %}
 
 export default class Base {
-  protected async request(props{{ ": RequestProps" if genType === "ts" }}) {
+  {{ "protected" if genType === "ts" }}async request(props{{ ": RequestProps" if genType === "ts" }}) {
     let url = props.url;
     let body{{ ": any" if genType === "ts" }};
     if ((props.method === 'get' || props.method === 'delete') && props.data) {
