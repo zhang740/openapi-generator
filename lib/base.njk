@@ -16,26 +16,34 @@ export interface RequestProps {
 export default class Base {
   {{ "protected" if genType === "ts" }}async request(props{{ ": RequestProps" if genType === "ts" }}) {
     let url = props.url;
-    let body{{ ": any" if genType === "ts" }};
+    const fetchOpt{{ ": Request" if genType === "ts" }} = {
+      url,
+      method: props.method,
+      headers: {
+        'accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    };
+
     if (props.data) {
       if (props.method === 'get' || props.method === 'delete') {
         url += joinQuery(props.data);
       } else {
-        body = props.data;
+        fetchOpt.body = JSON.stringify(props.data);
       }
     }
-    const fetchOpt{{ ": Request" if genType === "ts" }} = {
-      url,
-      method: props.method,
-    };
-    if (body) {
-      fetchOpt.body = body;
-    }
+    
     return fetch(url, fetchOpt)
       .then((res) => {
-        return res.json();
+        const data = await res.json();
+        if (res.status === 401) {
+          // TODO
+        } else if (!`${res.status}`.startsWith('2')) {
+          throw new Error(data.message);
+        }
+        return data;
       }).catch((err) => {
-        message.warn(err.message, 2000);
+        // message.warn(err.message, 2000);
       });
   }
 }
