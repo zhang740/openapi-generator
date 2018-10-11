@@ -16,7 +16,7 @@ export class {{ className }}Service extends Base {
       {%- endfor -%}
     {{ " " -}} };
     return await this.request({
-      method: `{{ mData.method }}`,
+      method: `{{ mData.method | lower }}`,
       url: `{{ mData.url | safe }}`,
       data: __data,
     });

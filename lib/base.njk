@@ -17,10 +17,12 @@ export default class Base {
   {{ "protected" if genType === "ts" }}async request(props{{ ": RequestProps" if genType === "ts" }}) {
     let url = props.url;
     let body{{ ": any" if genType === "ts" }};
-    if ((props.method === 'get' || props.method === 'delete') && props.data) {
-      data = props.data;
-    } else {
-      url += joinQuery(props.data);
+    if (props.data) {
+      if (props.method === 'get' || props.method === 'delete') {
+        url += joinQuery(props.data);
+      } else {
+        body = props.data;
+      }
     }
     const fetchOpt{{ ": Request" if genType === "ts" }} = {
       url,
@@ -29,6 +31,11 @@ export default class Base {
     if (body) {
       fetchOpt.body = body;
     }
-    return fetch(fetchOpt);
+    return fetch(url, fetchOpt)
+      .then((res) => {
+        return res.json();
+      }).catch((err) => {
+        message.warn(err.message, 2000);
+      });
   }
 }
