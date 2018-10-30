@@ -87,6 +87,19 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
       metadata[ClassName] = [];
     }
     metadata[ClassName].push(route);
+
+    // 类型兼容
+    route.params.forEach(param => {
+      switch (param.type) {
+        case 'integer':
+          param.type = 'number';
+          break;
+
+        case 'array':
+          param.type = `any[]`;
+          break;
+      }
+    });
   });
 
   const fileTemplate = fs.readFileSync(templatePath, 'utf8');
