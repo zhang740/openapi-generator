@@ -17,14 +17,19 @@ export interface RouteMetadataType {
   /** http url */
   url: string;
   /** 参数定义 */
-  params: {
-    /** 函数参数名 */
-    name: string,
-    /** 请求参数名 */
-    paramName: string,
-    /** 类型 */
-    type: string,
-  }[];
+  params: ParamType[];
+  /** path中参数定义 */
+  paramsInPath: ParamType[];
+}
+
+export interface ParamType {
+  /** 函数参数名 */
+  name: string;
+  /** 请求参数名 */
+  paramName: string;
+  /** 类型 */
+  type: string;
+  in: 'path' | 'query' | 'body';
 }
 
 export class GenConfig {
@@ -100,6 +105,9 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
           break;
       }
     });
+
+    // param in path
+    route.paramsInPath = route.params.filter(p => p.in === 'path');
   });
 
   const fileTemplate = fs.readFileSync(templatePath, 'utf8');
