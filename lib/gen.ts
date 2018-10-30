@@ -18,8 +18,6 @@ export interface RouteMetadataType {
   url: string;
   /** 参数定义 */
   params: ParamType[];
-  /** path中参数定义 */
-  paramsInPath: ParamType[];
 }
 
 export interface ParamType {
@@ -30,6 +28,11 @@ export interface ParamType {
   /** 类型 */
   type: string;
   in: 'path' | 'query' | 'body';
+}
+
+export interface TemplateRouteType extends RouteMetadataType {
+  /** path中参数定义 */
+  paramsInPath: ParamType[];
 }
 
 export class GenConfig {
@@ -82,7 +85,7 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
 
   // 模版中函数支持的变量
   const metadata: {
-    [key: string]: RouteMetadataType[],
+    [key: string]: TemplateRouteType[],
   } = {};
 
   data.forEach(route => {
@@ -91,7 +94,6 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
     if (!metadata[ClassName]) {
       metadata[ClassName] = [];
     }
-    metadata[ClassName].push(route);
 
     // 类型兼容
     route.params.forEach(param => {
@@ -106,8 +108,10 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
       }
     });
 
-    // param in path
-    route.paramsInPath = route.params.filter(p => p.in === 'path');
+    metadata[ClassName].push({
+      ...route,
+      paramsInPath: route.params.filter(p => p.in === 'path')
+    });
   });
 
   const fileTemplate = fs.readFileSync(templatePath, 'utf8');
