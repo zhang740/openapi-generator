@@ -31,8 +31,8 @@ export class GenConfig {
   sdkDir: string;
   /** 模版目录 */
   templatePath: string;
-  /** filename style */
-  camelCase?: boolean = false;
+  /** filename style, true 为大驼峰，lower 为小驼峰 */
+  camelCase?: boolean | 'lower' = false;
   /** gen type */
   type?: 'ts' | 'js' = 'ts';
 }

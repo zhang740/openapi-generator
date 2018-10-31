@@ -91,11 +91,14 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
       methodMetadata: metadata[className],
     });
 
+    let name = config.camelCase ?
+      toCamelCase(typeName) : toHyphenCase(typeName);
+    if (config.camelCase === 'lower') {
+      name = `${name[0].toLowerCase()}${name.substr(1)}`;
+    }
     const filePath = path.join(
       sdkDir,
-      `${config.camelCase ?
-        toCamelCase(typeName) : toHyphenCase(typeName)
-      }.${config.type}`,
+      `${name}.${config.type}`,
     );
     fs.writeFileSync(filePath, fileContent, { encoding: 'utf8' });
     console.log('[GenSDK] gen', filePath);
