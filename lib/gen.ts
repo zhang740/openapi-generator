@@ -99,8 +99,15 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
     route.params.forEach(param => {
       switch (param.type) {
         case 'integer':
+        case 'long':
+        case 'float':
+        case 'double':
           param.type = 'number';
           break;
+
+        case 'byte':
+        case 'binary':
+          param.type = 'string';
 
         case 'array':
           param.type = `any[]`;
