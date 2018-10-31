@@ -6,6 +6,7 @@ test('functionNameRD', t => {
     test: [
       { functionName: 'name' },
       { functionName: 'name' },
+      { functionName: 'name' },
     ]
   };
   functionNameRD(metadata);
@@ -13,6 +14,7 @@ test('functionNameRD', t => {
     test: [
       { functionName: 'name' },
       { functionName: 'name_1' },
+      { functionName: 'name_2' },
     ]
   });
 });

@@ -27,13 +27,14 @@ export function mkdir(dir: string) {
 export function functionNameRD(metadata: TemplateVarType) {
   Object.keys(metadata).forEach(className => {
     const clsMetadata = metadata[className];
-    const functionName: { [key: string]: number } = {};
+    const tmpFuncNames: { [key: string]: number } = {};
     clsMetadata.forEach(route => {
-      const count = functionName[route.functionName];
+      const functionName = route.functionName;
+      const count = tmpFuncNames[functionName];
       if (count) {
         route.functionName += `_${count}`;
       }
-      functionName[route.functionName] = count ? count + 1 : 1;
+      tmpFuncNames[functionName] = count ? count + 1 : 1;
     });
   });
 }
