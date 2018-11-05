@@ -7,7 +7,7 @@ import { RouteMetadataType, GenConfig, TemplateVarType } from './type';
 function genDefaultTemplate(config: GenConfig) {
   const templatePath = config.templatePath || path.join(config.sdkDir, 'sdk.njk');
   if (!fs.existsSync(templatePath)) {
-    console.log(`[genAPISDK] Not found template! ${templatePath}`);
+    console.log(`[GenSDK] Not found template! ${templatePath}`);
     try {
       fs.writeFileSync(templatePath, fs.readFileSync(path.join(__dirname, 'sdk.njk')));
 
@@ -20,7 +20,7 @@ function genDefaultTemplate(config: GenConfig) {
         fs.writeFileSync(baseServiceFile, fileContent);
       }
     } catch (error) {
-      console.log('[genAPISDK] Write default template error!', error);
+      console.log('[GenSDK] Write default template error!', error);
       return;
     }
   }
@@ -51,26 +51,6 @@ export function genAPISDK(data: RouteMetadataType[], config: GenConfig) {
     if (!metadata[ClassName]) {
       metadata[ClassName] = [];
     }
-
-    // 类型兼容
-    route.params.forEach(param => {
-      switch (param.type) {
-        case 'integer':
-        case 'long':
-        case 'float':
-        case 'double':
-          param.type = 'number';
-          break;
-
-        case 'byte':
-        case 'binary':
-          param.type = 'string';
-
-        case 'array':
-          param.type = `any[]`;
-          break;
-      }
-    });
 
     metadata[ClassName].push({
       ...route,
