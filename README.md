@@ -21,42 +21,33 @@
 [download-url]: https://npmjs.org/package/api-gensdk
 
 # Quick View
-```ts
-export interface RouteMetadataType {
-  /** 类名 */
-  className: string;
-  /** 方法名 */
-  functionName: string;
-  /** 路由名称 */
-  name: string;
-  /** 路由描述 */
-  description: string;
-  /** http method */
-  method: string;
-  /** http url */
-  url: string;
-  /** 参数定义 */
-  params: {
-    /** 函数参数名 */
-    name: string,
-    /** 请求参数名 */
-    paramName: string,
-    /** 类型 */
-    type: string,
-  }[];
-}
 
-export class GenConfig {
-  /** 生成目录 */
+gensdk from swagger 2.0 or OpenAPI 3.0:
+
+## Simple
+
+`gensdk url http://xxx/v2/api-docs -c true`
+
+## Use Config
+
+`gensdk config ./xxx.js` or `gensdk config ./xxx.json`
+
+Config interface:
+
+```ts
+interface CliConfig {
+  api: string;
+  /** dir for gensdk */
   sdkDir: string;
-  /** 模版目录 */
+  /** path for template */
   templatePath: string;
-  /** filename style */
-  camelCase?: boolean = false;
+  /** filename style, true 为大驼峰，lower 为小驼峰 */
+  camelCase?: boolean | 'lower' = false;
   /** gen type */
   type?: 'ts' | 'js' = 'ts';
 }
 ```
 
 ### genAPISDK
+
 `function genAPISDK(data: RouteMetadataType[], config: GenConfig) => void`
