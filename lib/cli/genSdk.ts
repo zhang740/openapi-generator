@@ -1,30 +1,36 @@
+import * as fs from 'fs';
 import { genAPISDK, GenConfig, RouteMetadataType } from '..';
-import * as request from 'request';
 import {
-  OpenAPIObject, PathItemObject, OperationObject, ParameterObject, RequestBodyObject, ReferenceObject, ResponsesObject, SchemaObject
+  OpenAPIObject, PathItemObject, OperationObject, ParameterObject, RequestBodyObject,
+  ReferenceObject, ResponsesObject, SchemaObject
 } from 'openapi3-ts';
 import { resolveRef, s2o } from '../util/parse';
 import { getType } from '../util/getType';
+import { getDataFromUrl } from '../util/getDataFromUrl';
 import { ParamType } from '../type';
 
-async function getJSONObjectFromUrl(url: string) {
-  return new Promise<string>((resolve, reject) => {
-    request(url, (error, response, body) => {
-      if (error) {
-        console.warn('[Api-GenSDK] err', error);
-        reject(error);
-      }
-      if (response.statusCode !== 200) {
-        console.warn('[Api-GenSDK] err', error);
-        reject(new Error(response.statusMessage));
-      }
-      resolve(body);
-    });
-  });
+interface CliConfig extends GenConfig {
+  api: string;
+}
+
+export async function genAPISDKFromConfig(cfgPath: string) {
+  let configs: CliConfig[];
+  try {
+    configs = require(cfgPath);
+    console.log('[GenSDK] read config as js');
+  } catch (error) {
+    configs = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+    console.log('[GenSDK] read config as json');
+  }
+  configs = [].concat(configs);
+  return Promise.all(configs.map(cfg => {
+    const { api, ...rest } = cfg;
+    return genAPISDKFromUrl(api, rest);
+  }));
 }
 
 export async function genAPISDKFromUrl(url: string, config: GenConfig) {
-  let data: OpenAPIObject = JSON.parse(await getJSONObjectFromUrl(url));
+  let data: OpenAPIObject = JSON.parse(await getDataFromUrl(url));
 
   if (!data || !data.paths || !data.info) {
     throw new Error('数据格式不正确');

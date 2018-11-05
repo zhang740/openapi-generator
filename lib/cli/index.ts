@@ -1,6 +1,7 @@
 require('colorful').colorful();
+import * as path from 'path';
 import * as program from 'commander';
-import { genAPISDKFromUrl } from './genSdk';
+import { genAPISDKFromUrl, genAPISDKFromConfig } from './genSdk';
 let packageInfo = require('../../package.json');
 
 program.version(packageInfo.version);
@@ -24,6 +25,20 @@ program
       type: type || 'ts',
       camelCase: camelCase === 'true' ? true : camelCase,
     })
+      .then(_ => process.exit(0))
+      .catch(error => console.log('[Api-GenSDK] err:\n', error));
+  });
+
+program
+  .command('config <cfgPath>')
+  .description('config path')
+  .action(function (cfgPath) {
+    if (!cfgPath) {
+      console.error('[Api-GenSDK] err NEED config file path');
+      return;
+    }
+    cfgPath = path.isAbsolute(cfgPath) ? cfgPath : path.join(process.cwd(), cfgPath);
+    genAPISDKFromConfig(cfgPath)
       .then(_ => process.exit(0))
       .catch(error => console.log('[Api-GenSDK] err:\n', error));
   });
