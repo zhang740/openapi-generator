@@ -17,6 +17,9 @@ export async function genAPISDKFromConfig(cfgPath: string) {
   let configs: CliConfig[];
   try {
     configs = require(cfgPath);
+    if ((configs as any).__esModule) {
+      configs = (configs as any).default;
+    }
     console.log('[GenSDK] read config as js');
   } catch (error) {
     configs = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
