@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import { genAPISDK, GenConfig, RouteMetadataType } from '..';
 import {
   OpenAPIObject, PathItemObject, OperationObject, ParameterObject, RequestBodyObject,
@@ -10,7 +11,9 @@ import { getDataFromUrl } from '../util/getDataFromUrl';
 import { ParamType } from '../type';
 
 interface CliConfig extends GenConfig {
-  api: string;
+  api?: string;
+  // 生成 service 时，会删除 sdkDir 目录下的全部文件，可以通过 ignore 参数指定不参数的文件名
+  ignore?: string[];
 }
 
 export async function genAPISDKFromConfig(cfgPath: string) {
@@ -27,12 +30,11 @@ export async function genAPISDKFromConfig(cfgPath: string) {
   }
   configs = [].concat(configs);
   return Promise.all(configs.map(cfg => {
-    const { api, ...rest } = cfg;
-    return genAPISDKFromUrl(api, rest);
+    return genAPISDKFromUrl(cfg.api, cfg);
   }));
 }
 
-export async function genAPISDKFromUrl(url: string, config: GenConfig) {
+export async function genAPISDKFromUrl(url: string, config: CliConfig) {
   let data: OpenAPIObject = JSON.parse(await getDataFromUrl(url));
 
   if (!data || !data.paths || !data.info) {
@@ -63,6 +65,15 @@ export async function genAPISDKFromUrl(url: string, config: GenConfig) {
 
   if (!data.openapi || !data.openapi.startsWith('3.0.')) {
     throw new Error('数据格式不正确，仅支持 OAS 3.0/Swagger 2.0');
+  }
+
+  if (fs.existsSync(config.sdkDir)) {
+    fs.readdirSync(config.sdkDir).forEach((file) => {
+      const absoluteFilePath = path.join(config.sdkDir, '/', file);
+      if ((config.ignore || []).indexOf(file) === -1 && absoluteFilePath !== file) {
+        fs.unlinkSync(absoluteFilePath);
+      }
+    });
   }
 
   const apis: RouteMetadataType[] = [];
