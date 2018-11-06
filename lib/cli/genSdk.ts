@@ -111,16 +111,31 @@ const getParams = (
     };
   })) as ParamType[];
 
-  const postData = requestBody.content && (requestBody.content['application/json'].schema as SchemaObject).properties || {};
-  for (const k in postData) {
-    params.push({
-      name: k,
-      paramName: k,
-      in: 'body',
-      type: getType(postData[k]),
-    });
-  }
+  const bodySchema = requestBody.content && (requestBody.content['application/json'].schema as SchemaObject);
+  if (bodySchema) {
+    switch (bodySchema.type) {
+      case 'object':
+        const postData = bodySchema.properties || {};
+        for (const k in postData) {
+          params.push({
+            name: k,
+            paramName: k,
+            in: 'body',
+            type: getType(postData[k]),
+          });
+        }
+        break;
 
+      default:
+        params.push({
+          name: '$body',
+          paramName: '$body',
+          in: 'body',
+          type: getType(bodySchema),
+        });
+        break;
+    }
+  }
   return params;
 };
 
