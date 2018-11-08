@@ -1,4 +1,4 @@
-# api-openapi-generator
+# openapi-generator
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
@@ -7,18 +7,18 @@
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![npm download][download-image]][download-url]
 
-[npm-image]: https://img.shields.io/npm/v/api-openapi-generator.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/api-openapi-generator
-[travis-image]: https://img.shields.io/travis/zhang740/api-openapi-generator.svg?style=flat-square
-[travis-url]: https://travis-ci.org/zhang740/api-openapi-generator
-[codecov-image]: https://codecov.io/github/zhang740/api-openapi-generator/coverage.svg?branch=master
-[codecov-url]: https://codecov.io/github/zhang740/api-openapi-generator?branch=master
-[david-image]: https://img.shields.io/david/zhang740/api-openapi-generator.svg?style=flat-square
-[david-url]: https://david-dm.org/zhang740/api-openapi-generator
-[snyk-image]: https://snyk.io/test/npm/api-openapi-generator/badge.svg?style=flat-square
-[snyk-url]: https://snyk.io/test/npm/api-openapi-generator
-[download-image]: https://img.shields.io/npm/dm/api-openapi-generator.svg?style=flat-square
-[download-url]: https://npmjs.org/package/api-openapi-generator
+[npm-image]: https://img.shields.io/npm/v/openapi-generator.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/openapi-generator
+[travis-image]: https://img.shields.io/travis/zhang740/openapi-generator.svg?style=flat-square
+[travis-url]: https://travis-ci.org/zhang740/openapi-generator
+[codecov-image]: https://codecov.io/github/zhang740/openapi-generator/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/zhang740/openapi-generator?branch=master
+[david-image]: https://img.shields.io/david/zhang740/openapi-generator.svg?style=flat-square
+[david-url]: https://david-dm.org/zhang740/openapi-generator
+[snyk-image]: https://snyk.io/test/npm/openapi-generator/badge.svg?style=flat-square
+[snyk-url]: https://snyk.io/test/npm/openapi-generator
+[download-image]: https://img.shields.io/npm/dm/openapi-generator.svg?style=flat-square
+[download-url]: https://npmjs.org/package/openapi-generator
 
 # Quick View
 
