@@ -1,0 +1,13 @@
+declare namespace {{ namespace }} {
+  {% for type in list -%}
+  export interface {{ type.typeName | safe }} {
+    {%- for prop in type.props %}
+    {%- if prop.desc %}
+    /** {{ prop.desc }} */
+    {%- endif %}
+    {{ prop.name }}{{ '' if prop.required else '?' }}: {{ prop.type | safe }};
+    {%- endfor %}
+  }
+
+  {% endfor -%}
+}

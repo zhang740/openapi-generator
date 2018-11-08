@@ -1,7 +1,7 @@
 require('colorful').colorful();
 import * as path from 'path';
 import * as program from 'commander';
-import { genAPISDKFromUrl, genAPISDKFromConfig } from './genSdk';
+import { genSDK, genFromUrl } from '../';
 let packageInfo = require('../../package.json');
 
 program.version(packageInfo.version);
@@ -19,7 +19,7 @@ program
       console.error('[Api-GenSDK] err NEED Url');
       return;
     }
-    genAPISDKFromUrl(url, {
+    genFromUrl(url, {
       sdkDir: sdkDir || `${process.cwd()}/service`,
       templatePath,
       type: type || 'ts',
@@ -38,7 +38,7 @@ program
       return;
     }
     cfgPath = path.isAbsolute(cfgPath) ? cfgPath : path.join(process.cwd(), cfgPath);
-    genAPISDKFromConfig(cfgPath)
+    genSDK(cfgPath)
       .then(_ => process.exit(0))
       .catch(error => console.log('[Api-GenSDK] err:\n', error));
   });

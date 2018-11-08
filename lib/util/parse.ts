@@ -1,22 +1,6 @@
-import * as Swagger2OAS from 'swagger2openapi';
 import { OpenAPIObject, ReferenceObject } from 'openapi3-ts';
 
-export function s2o(data: any) {
-  return new Promise<OpenAPIObject>((resolve, reject) => {
-    data = Swagger2OAS.convertObj(data, {
-      warnOnly: true,
-      patch: true,
-      resolve: true,
-    }, (err: any, result: any) => {
-      if (err) {
-        return reject(err);
-      }
-      return resolve(result.openapi);
-    }) || {};
-  });
-}
-
-export function getValue<T = any>(func: () => T, defaultValue?: T) {
+export function guard<T = any>(func: () => T, defaultValue?: T) {
   try {
     return func();
   } catch (error) {
@@ -26,7 +10,7 @@ export function getValue<T = any>(func: () => T, defaultValue?: T) {
 
 /** 解析绝对路径$ref */
 export function resolveRef(rootData: OpenAPIObject, refObject: ReferenceObject | any) {
-  return getValue(() => {
+  return guard(() => {
     let result: any = refObject;
     if (refObject.$ref) {
       const refPaths = refObject.$ref.split('/');

@@ -1,0 +1,89 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "version": "1.0",
+    "title": "xxx api doc",
+    "contact": {
+      "name": "xxx"
+    }
+  },
+  "tags": [
+    {
+      "name": "xxx-controller",
+      "description": "XXX Controller"
+    }
+  ],
+  "paths": {
+    "/xxx": {
+      "get": {
+        "tags": [
+          "xxx-controller"
+        ],
+        "summary": "summary",
+        "description": "description",
+        "operationId": "queryXXX",
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "query",
+            "description": "param description",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultDTO_Map_string_string_"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "//127.0.0.1:8080/"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "ResultDTO_Map_string_string_": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMsg": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

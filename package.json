@@ -1,6 +1,6 @@
 {
-  "name": "api-gensdk",
-  "version": "0.1.22",
+  "name": "openapi-generator",
+  "version": "0.1.0",
   "description": "",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -33,14 +33,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zhang740/api-gensdk.git"
+    "url": "git+https://github.com/zhang740/openapi-generator.git"
   },
   "author": "zhang740",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zhang740/api-gensdk/issues"
+    "url": "https://github.com/zhang740/openapi-generator/issues"
   },
-  "homepage": "https://github.com/zhang740/api-gensdk#readme",
+  "homepage": "https://github.com/zhang740/openapi-generator#readme",
   "dependencies": {
     "@types/nunjucks": "^3.1.0",
     "@types/request": "^2.48.0",

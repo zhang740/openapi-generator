@@ -1,4 +1,4 @@
-# api-gensdk
+# api-openapi-generator
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
@@ -7,37 +7,37 @@
 [![Known Vulnerabilities][snyk-image]][snyk-url]
 [![npm download][download-image]][download-url]
 
-[npm-image]: https://img.shields.io/npm/v/api-gensdk.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/api-gensdk
-[travis-image]: https://img.shields.io/travis/zhang740/api-gensdk.svg?style=flat-square
-[travis-url]: https://travis-ci.org/zhang740/api-gensdk
-[codecov-image]: https://codecov.io/github/zhang740/api-gensdk/coverage.svg?branch=master
-[codecov-url]: https://codecov.io/github/zhang740/api-gensdk?branch=master
-[david-image]: https://img.shields.io/david/zhang740/api-gensdk.svg?style=flat-square
-[david-url]: https://david-dm.org/zhang740/api-gensdk
-[snyk-image]: https://snyk.io/test/npm/api-gensdk/badge.svg?style=flat-square
-[snyk-url]: https://snyk.io/test/npm/api-gensdk
-[download-image]: https://img.shields.io/npm/dm/api-gensdk.svg?style=flat-square
-[download-url]: https://npmjs.org/package/api-gensdk
+[npm-image]: https://img.shields.io/npm/v/api-openapi-generator.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/api-openapi-generator
+[travis-image]: https://img.shields.io/travis/zhang740/api-openapi-generator.svg?style=flat-square
+[travis-url]: https://travis-ci.org/zhang740/api-openapi-generator
+[codecov-image]: https://codecov.io/github/zhang740/api-openapi-generator/coverage.svg?branch=master
+[codecov-url]: https://codecov.io/github/zhang740/api-openapi-generator?branch=master
+[david-image]: https://img.shields.io/david/zhang740/api-openapi-generator.svg?style=flat-square
+[david-url]: https://david-dm.org/zhang740/api-openapi-generator
+[snyk-image]: https://snyk.io/test/npm/api-openapi-generator/badge.svg?style=flat-square
+[snyk-url]: https://snyk.io/test/npm/api-openapi-generator
+[download-image]: https://img.shields.io/npm/dm/api-openapi-generator.svg?style=flat-square
+[download-url]: https://npmjs.org/package/api-openapi-generator
 
 # Quick View
 
-gensdk from swagger 2.0 or OpenAPI 3.0:
+openapi-generator from swagger 2.0 or OpenAPI 3.0:
 
 ## Simple
 
-`gensdk url http://xxx/v2/api-docs -c true`
+`openapi-generator url http://xxx/v2/api-docs -c true`
 
 ## Use Config
 
-`gensdk config ./xxx.js` or `gensdk config ./xxx.json`
+`openapi-generator config ./xxx.js` or `openapi-generator config ./xxx.json`
 
 Config interface:
 
 ```ts
 interface CliConfig {
   api: string;
-  /** dir for gensdk */
+  /** dir for openapi-generator */
   sdkDir: string;
   /** path for template */
   templatePath: string;
@@ -45,6 +45,28 @@ interface CliConfig {
   camelCase?: boolean | 'lower' = false;
   /** gen type */
   type?: 'ts' | 'js' = 'ts';
+}
+interface CliConfig {
+  api: string;
+
+  /** dir for openapi-generator */
+  sdkDir: string;
+  /** path of service template */
+  templatePath?: string;
+  /** path of interface template */
+  interfaceTemplatePath?: string;
+  /** request lib */
+  requestLib = true;
+  /** filename style, true 为大驼峰，lower 为小驼峰 */
+  camelCase?: boolean | 'lower' = false;
+  /** gen type */
+  type?: 'ts' | 'js' = 'ts';
+  /** service type */
+  serviceType?: 'function' | 'class' = 'function';
+  /** namespace of typings */
+  namespace?: string = 'API';
+  /** 自动清除旧文件时忽略列表 */
+  ignoreDelete: string[] = [];
 }
 ```
 

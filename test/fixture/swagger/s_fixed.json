@@ -1,0 +1,84 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0",
+    "title": "xxx api doc",
+    "contact": {
+      "name": "xxx"
+    }
+  },
+  "host": "127.0.0.1:8080",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "xxx-controller",
+      "description": "XXX Controller"
+    }
+  ],
+  "paths": {
+    "/xxx": {
+      "get": {
+        "tags": [
+          "xxx-controller"
+        ],
+        "summary": "summary",
+        "description": "description",
+        "operationId": "queryXXX",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "*/*"
+        ],
+        "parameters": [
+          {
+            "name": "param1",
+            "in": "query",
+            "description": "param description",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/DTO_0"
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "DTO_0": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "errorCode": {
+          "type": "string"
+        },
+        "errorMsg": {
+          "type": "string"
+        },
+        "success": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
