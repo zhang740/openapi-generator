@@ -122,7 +122,7 @@ const getParams = (
     };
   })) as ParamType[];
 
-  const bodySchema = requestBody.content && (requestBody.content['application/json'].schema as SchemaObject);
+  const bodySchema = requestBody.content && (requestBody.content[Object.keys(requestBody.content)[0]].schema as SchemaObject);
   if (bodySchema) {
     switch (bodySchema.type) {
       case 'object':
