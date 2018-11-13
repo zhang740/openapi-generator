@@ -5,7 +5,7 @@ import request from './base';
 
 {% for api in list -%}
 /** {{ api.desc }} */
-export async function {{ api.operationId }}(
+export async function {{ api.functionName }}(
 {%- if api.params %}
   params
   {%- if genType === "ts" -%}

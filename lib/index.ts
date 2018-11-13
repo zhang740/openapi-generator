@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts';
 import { s2o, fixRefSwagger, requestData } from './util';
-import { ServiceGenerator, GenConfig, TagAPIDataType } from './ServiceGenerator';
+import { ServiceGenerator, GenConfig } from './ServiceGenerator';
 
 export interface CliConfig extends GenConfig {
   api: string;
@@ -61,29 +61,7 @@ export async function genFromUrl(url: string, config: GenConfig) {
     throw new Error('数据格式不正确，仅支持 OpenAPI 3.0/Swagger 2.0');
   }
 
-  const apiData: TagAPIDataType = {};
-
-  Object.keys(data.paths).forEach(path => {
-    const pathItem: PathItemObject = data.paths[path];
-
-    ['get', 'put', 'post', 'delete'].forEach(method => {
-      const operationObject: OperationObject = pathItem[method];
-      if (operationObject) {
-        operationObject.tags.forEach(tag => {
-          if (!apiData[tag]) {
-            apiData[tag] = [];
-          }
-          apiData[tag].push({
-            path,
-            method,
-            ...operationObject,
-          });
-        });
-      }
-    });
-  });
-
-  const generator = new ServiceGenerator(config, apiData, data);
+  const generator = new ServiceGenerator(config, data);
   generator.genFile();
 }
 

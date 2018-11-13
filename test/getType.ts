@@ -2,7 +2,7 @@ import test from 'ava';
 import { ServiceGenerator } from '../lib/ServiceGenerator';
 
 // tmp
-const gen = new ServiceGenerator({} as any, {} as any, {} as any) as any;
+const gen = new ServiceGenerator({} as any, {} as any) as any;
 
 test('base type', t => {
   // number

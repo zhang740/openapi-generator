@@ -2,8 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as nunjucks from 'nunjucks';
 import {
-  OpenAPIObject, SchemaObject, ReferenceObject,
-  ParameterObject, RequestBodyObject, ContentObject, ResponseObject, ResponsesObject, OperationObject,
+  OpenAPIObject, SchemaObject, ReferenceObject, ParameterObject, RequestBodyObject, ContentObject, ResponseObject, ResponsesObject, OperationObject, PathItemObject,
 } from 'openapi3-ts';
 
 export class GenConfig {
@@ -25,6 +24,13 @@ export class GenConfig {
   namespace?: string = 'API';
   /** 自动清除旧文件时忽略列表 */
   ignoreDelete?: string[] = [];
+  /** 数据处理钩子 */
+  hook?: {
+    /** 自定义函数名称 */
+    customFunctionName?: (data: OperationObject) => string;
+    /** 自定义类名 */
+    customClassName?: (tagName: string) => string;
+  } = {};
 }
 
 export interface APIDataType extends OperationObject {
@@ -38,11 +44,31 @@ export interface TagAPIDataType {
 
 
 export class ServiceGenerator {
+  private apiData: TagAPIDataType = {};
+
   constructor(
     private config: GenConfig,
-    private apiData: TagAPIDataType,
     private openAPIData: OpenAPIObject,
   ) {
+    Object.keys(openAPIData.paths || {}).forEach(path => {
+      const pathItem: PathItemObject = openAPIData.paths[path];
+
+      ['get', 'put', 'post', 'delete'].forEach(method => {
+        const operationObject: OperationObject = pathItem[method];
+        if (operationObject) {
+          operationObject.tags.forEach(tag => {
+            if (!this.apiData[tag]) {
+              this.apiData[tag] = [];
+            }
+            this.apiData[tag].push({
+              path,
+              method,
+              ...operationObject,
+            });
+          });
+        }
+      });
+    });
   }
 
   genFile() {
@@ -116,15 +142,16 @@ export class ServiceGenerator {
   private genService() {
     Object.keys(this.apiData).forEach(tag => {
       const genParams = this.apiData[tag].map(api => {
-        const url = api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
-          return `\$\{${str}\}`;
-        });
         const params = this.getParamsTemplateParam(api.parameters);
         const body = this.getBodyTemplateParam(api.requestBody);
         const response = this.getResponseTemplateParam(api.responses);
         return {
           ...api,
-          path: url,
+          functionName: this.config.hook.customFunctionName ?
+            this.config.hook.customFunctionName(api) : api.operationId,
+          path: api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
+            return `\$\{${str}\}`;
+          }),
           method: api.method,
           desc: [api.summary, api.description].filter(s => s).join(' '),
           hasHeader: !!(params && params.header) || !!(body && body.mediaType),
@@ -134,11 +161,15 @@ export class ServiceGenerator {
         };
       });
 
+      const className = this.config.hook.customClassName ?
+        this.config.hook.customClassName(tag) : this.toCamelCase(tag);
       this.genFileFromTemplate(
-        this.getFinalFileName(`${tag}.${this.config.type}`),
+        this.getFinalFileName(`${className}.${this.config.type}`),
         'service',
         {
           genType: this.config.type,
+          className,
+          instanceName: `${className[0].toLowerCase()}${className.substr(1)}`,
           list: genParams,
         },
       );
@@ -206,13 +237,16 @@ export class ServiceGenerator {
 
   private genFileFromTemplate(fileName: string, type: 'interface' | 'service', params: any) {
     const template = this.getTemplate(type);
-    const fileContent = nunjucks.renderString(template, params);
+    this.writeFile(fileName, nunjucks.renderString(template, params));
+  }
+
+  private writeFile(fileName: string, content: string) {
     const filePath = path.join(
       this.config.sdkDir,
       fileName,
     );
     this.mkdir(path.dirname(filePath));
-    fs.writeFileSync(filePath, fileContent, { encoding: 'utf8' });
+    fs.writeFileSync(filePath, content, { encoding: 'utf8' });
   }
 
   private getTemplate(type: 'interface' | 'service') {
