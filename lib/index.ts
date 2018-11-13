@@ -76,6 +76,7 @@ export async function genFromUrl(config: CliConfig) {
   }
 
   if (config.saveOpenAPIData) {
+    mkdir(config.sdkDir);
     fs.writeFileSync(
       path.join(config.sdkDir, 'oas.json'),
       JSON.stringify(data, null, 2),
@@ -93,4 +94,11 @@ function getAbsolutePath(filePath: string) {
       path.join(process.cwd(), filePath) :
       filePath
     : filePath;
+}
+
+function mkdir(dir: string) {
+  if (!fs.existsSync(dir)) {
+    mkdir(path.dirname(dir));
+    fs.mkdirSync(dir);
+  }
 }

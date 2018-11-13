@@ -136,14 +136,27 @@ export class ServiceGenerator {
 
   private getServiceTP() {
     return Object.keys(this.apiData).map(tag => {
+
+      // functionName 防重
+      const tmpFunctionRD: { [key: string]: number } = {};
+
       const genParams = this.apiData[tag].map(api => {
         const params = this.getParamsTP(api.parameters);
         const body = this.getBodyTP(api.requestBody);
         const response = this.getResponseTP(api.responses);
+
+        let functionName = this.config.hook.customFunctionName ?
+          this.config.hook.customFunctionName(api) : api.operationId;
+
+        if (tmpFunctionRD[functionName]) {
+          functionName = `${functionName}_${tmpFunctionRD[functionName]++}`;
+        } else {
+          tmpFunctionRD[functionName] = 1;
+        }
+
         return {
           ...api,
-          functionName: this.config.hook.customFunctionName ?
-            this.config.hook.customFunctionName(api) : api.operationId,
+          functionName,
           path: api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
             return `\$\{${str}\}`;
           }),
@@ -154,14 +167,6 @@ export class ServiceGenerator {
           body,
           response,
         };
-      });
-      const tmpFunctionRD: { [key: string]: number } = {};
-      genParams.forEach(param => {
-        if (tmpFunctionRD[param.functionName]) {
-          param.functionName = `${param.functionName}_${tmpFunctionRD[param.functionName]++}`;
-        } else {
-          tmpFunctionRD[param.functionName] = 1;
-        }
       });
 
       const className = this.config.hook.customClassName ?

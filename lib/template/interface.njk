@@ -1,5 +1,6 @@
 declare namespace {{ namespace }} {
   {% for type in list -%}
+{%- if type.props.length %}
   export interface {{ type.typeName | safe }} {
     {%- for prop in type.props %}
     {%- if prop.desc %}
@@ -8,6 +9,8 @@ declare namespace {{ namespace }} {
     {{ prop.name }}{{ '' if prop.required else '?' }}: {{ prop.type | safe }};
     {%- endfor %}
   }
-
-  {% endfor -%}
+{%- else %}
+  export type {{ type.typeName | safe }} = {{ type.type }};
+{%- endif %}
+{% endfor %}
 }
