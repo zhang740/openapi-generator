@@ -167,19 +167,20 @@ const commonFetch = (newUrl, newOptions, newConfigs) => {
 };
 
 {% if genType === "ts" -%}
-export interface ReqOpt {
+export interface IOptions {
   method: string;
   headers?: any;
   params?: any;
   body?: any;
+  data?: any;
 }
 {%- endif %}
-const request = (url, options{{ ": ReqOpt" if genType === "ts" }}, configs = {}) => {
+const request = (url, options{{ "?: IOptions" if genType === "ts" }}, configs = {}) => {
   let newOptions = {
     method: 'GET',
     credentials: 'same-origin',
     headers: options.headers || {},
-    data: options.body || options.params,
+    data: options.body || options.params || options.data,
   };
 
   const newConfigs = {
@@ -200,8 +201,8 @@ const request = (url, options{{ ": ReqOpt" if genType === "ts" }}, configs = {})
   newOptions = beforeSend(newOptions);
 
   let newUrl = url;
-  if (newOptions.method === 'GET' && options) {
-    newUrl += `?${qs.stringify(options.params)}`;
+  if ((newOptions.method === 'GET' || newOptions.method === 'DELETE') && options) {
+    newUrl += `?${qs.stringify(options.data)}`;
   }
 
   if (newConfigs.ctoken) {
