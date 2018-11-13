@@ -19,7 +19,8 @@ program
       console.error('[Api-GenSDK] err NEED Url');
       return;
     }
-    genFromUrl(url, {
+    genFromUrl({
+      api: url,
       sdkDir: sdkDir || `${process.cwd()}/service`,
       templatePath,
       type: type || 'ts',

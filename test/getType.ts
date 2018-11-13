@@ -27,7 +27,7 @@ test('base type', t => {
 });
 
 test('enum', t => {
-  t.deepEqual(gen.getType({ type: 'string', enum: ['open', 'close'] }), `'open' | 'close'`);
+  t.deepEqual(gen.getType({ type: 'string', enum: ['open', 'close'] }), `"open" | "close"`);
 });
 
 test('array, base type', t => {

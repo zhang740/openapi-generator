@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts';
 import { s2o, fixRefSwagger, requestData } from './util';
@@ -5,6 +6,7 @@ import { ServiceGenerator, GenConfig } from './ServiceGenerator';
 
 export interface CliConfig extends GenConfig {
   api: string;
+  saveOpenAPIData?: boolean;
 }
 
 export async function genSDK(cfgPath: string) {
@@ -17,20 +19,20 @@ export async function genSDK(cfgPath: string) {
   console.log('[GenSDK] read config as js');
 
   return Promise.all(configs.map(cfg => {
-    const { api, ...rest } = {
+    cfg = {
       ...new GenConfig,
       ...cfg,
     };
-    rest.sdkDir = getAbsolutePath(rest.sdkDir);
-    rest.interfaceTemplatePath = getAbsolutePath(rest.interfaceTemplatePath);
-    rest.templatePath = getAbsolutePath(rest.templatePath);
-    return genFromUrl(api, rest);
+    cfg.sdkDir = getAbsolutePath(cfg.sdkDir);
+    cfg.interfaceTemplatePath = getAbsolutePath(cfg.interfaceTemplatePath);
+    cfg.templatePath = getAbsolutePath(cfg.templatePath);
+    return genFromUrl(cfg);
   }));
 }
 
-export async function genFromUrl(url: string, config: GenConfig) {
-  console.log('[GenSDK] load', url);
-  let data: OpenAPIObject = JSON.parse(await requestData(url));
+export async function genFromUrl(config: CliConfig) {
+  console.log('[GenSDK] load', config.api);
+  let data: OpenAPIObject = JSON.parse(await requestData(config.api));
 
   if (!data || !data.paths || !data.info) {
     throw new Error('数据格式不正确');
@@ -59,6 +61,26 @@ export async function genFromUrl(url: string, config: GenConfig) {
 
   if (!data.openapi || !data.openapi.startsWith('3.')) {
     throw new Error('数据格式不正确，仅支持 OpenAPI 3.0/Swagger 2.0');
+  }
+
+  if (fs.existsSync(config.sdkDir)) {
+    fs.readdirSync(config.sdkDir).forEach((file) => {
+      if (!['d.ts', '.ts', '.js'].some(ext => path.extname(file) === ext)) {
+        return;
+      }
+      const absoluteFilePath = path.join(config.sdkDir, '/', file);
+      if ((config.ignoreDelete || []).indexOf(file) === -1 && absoluteFilePath !== file) {
+        fs.unlinkSync(absoluteFilePath);
+      }
+    });
+  }
+
+  if (config.saveOpenAPIData) {
+    fs.writeFileSync(
+      path.join(config.sdkDir, 'oas.json'),
+      JSON.stringify(data, null, 2),
+      'utf8'
+    );
   }
 
   const generator = new ServiceGenerator(config, data);

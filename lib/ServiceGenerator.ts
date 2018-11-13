@@ -42,7 +42,6 @@ export interface TagAPIDataType {
   [tag: string]: APIDataType[];
 }
 
-
 export class ServiceGenerator {
   private apiData: TagAPIDataType = {};
 
@@ -72,18 +71,28 @@ export class ServiceGenerator {
   }
 
   genFile() {
-    if (fs.existsSync(this.config.sdkDir)) {
-      fs.readdirSync(this.config.sdkDir).forEach((file) => {
-        if (!['d.ts', '.ts', '.js'].some(ext => path.extname(file) === ext)) {
-          return;
-        }
-        const absoluteFilePath = path.join(this.config.sdkDir, '/', file);
-        if ((this.config.ignoreDelete || []).indexOf(file) === -1 && absoluteFilePath !== file) {
-          fs.unlinkSync(absoluteFilePath);
-        }
-      });
-    }
+    this.genRequestLib();
 
+    if (this.config.type === 'ts') {
+      this.genFileFromTemplate(
+        'typings.d.ts',
+        'interface',
+        {
+          namespace: this.config.namespace,
+          list: this.getInterfaceTP()
+        }
+      );
+    }
+    this.getServiceTP().map(tp => {
+      this.genFileFromTemplate(
+        this.getFinalFileName(`${tp.className}.${this.config.type}`),
+        'service',
+        tp,
+      );
+    });
+  }
+
+  private genRequestLib() {
     if (this.config.requestLib) {
       this.mkdir(this.config.sdkDir);
       const basePath = path.join(this.config.sdkDir, `base.${this.config.type}`);
@@ -95,16 +104,11 @@ export class ServiceGenerator {
         ), 'utf8');
       }
     }
-
-    if (this.config.type === 'ts') {
-      this.genInterface();
-    }
-    this.genService();
   }
 
-  private genInterface() {
+  private getInterfaceTP() {
     const defines = this.openAPIData.components.schemas;
-    const genParams = Object.keys(defines).map(typeName => {
+    return Object.keys(defines).map(typeName => {
       const props: SchemaObject = this.resolveRefObject(defines[typeName]);
 
       if (props.type !== 'object') {
@@ -128,23 +132,14 @@ export class ServiceGenerator {
         }),
       };
     });
-
-    this.genFileFromTemplate(
-      'typings.d.ts',
-      'interface',
-      {
-        namespace: this.config.namespace,
-        list: genParams
-      },
-    );
   }
 
-  private genService() {
-    Object.keys(this.apiData).forEach(tag => {
+  private getServiceTP() {
+    return Object.keys(this.apiData).map(tag => {
       const genParams = this.apiData[tag].map(api => {
-        const params = this.getParamsTemplateParam(api.parameters);
-        const body = this.getBodyTemplateParam(api.requestBody);
-        const response = this.getResponseTemplateParam(api.responses);
+        const params = this.getParamsTP(api.parameters);
+        const body = this.getBodyTP(api.requestBody);
+        const response = this.getResponseTP(api.responses);
         return {
           ...api,
           functionName: this.config.hook.customFunctionName ?
@@ -160,23 +155,27 @@ export class ServiceGenerator {
           response,
         };
       });
+      const tmpFunctionRD: { [key: string]: number } = {};
+      genParams.forEach(param => {
+        if (tmpFunctionRD[param.functionName]) {
+          param.functionName = `${param.functionName}_${tmpFunctionRD[param.functionName]++}`;
+        } else {
+          tmpFunctionRD[param.functionName] = 1;
+        }
+      });
 
       const className = this.config.hook.customClassName ?
         this.config.hook.customClassName(tag) : this.toCamelCase(tag);
-      this.genFileFromTemplate(
-        this.getFinalFileName(`${className}.${this.config.type}`),
-        'service',
-        {
-          genType: this.config.type,
-          className,
-          instanceName: `${className[0].toLowerCase()}${className.substr(1)}`,
-          list: genParams,
-        },
-      );
+      return {
+        genType: this.config.type,
+        className,
+        instanceName: `${className[0].toLowerCase()}${className.substr(1)}`,
+        list: genParams,
+      };
     });
   }
 
-  private getBodyTemplateParam(requestBody?: any) {
+  private getBodyTP(requestBody?: any) {
     const reqBody: RequestBodyObject = this.resolveRefObject(requestBody);
     if (!reqBody) {
       return;
@@ -193,7 +192,7 @@ export class ServiceGenerator {
     };
   }
 
-  private getResponseTemplateParam(responses?: ResponsesObject) {
+  private getResponseTP(responses?: ResponsesObject) {
     const response: ResponseObject = this.resolveRefObject(responses.default || responses['200']);
     const defaultResponse = {
       mediaType: '*/*',
@@ -214,7 +213,7 @@ export class ServiceGenerator {
     };
   }
 
-  private getParamsTemplateParam(parameters?: (ParameterObject | ReferenceObject)[]) {
+  private getParamsTP(parameters?: (ParameterObject | ReferenceObject)[]) {
     if (!parameters || !parameters.length) {
       return;
     }
@@ -350,7 +349,9 @@ export class ServiceGenerator {
       case 'url':
       case 'byte':
       case 'binary':
-        return schemaObject.enum ? schemaObject.enum.map(v => `'${v}'`).join(' | ') || 'string' : 'string';
+        return schemaObject.enum ?
+          schemaObject.enum.map(v => `"${v.replace(/"/g, '\"')}"`).join(' | ') || 'string'
+          : 'string';
 
       case 'boolean':
         return 'boolean';
