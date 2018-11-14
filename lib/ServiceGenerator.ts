@@ -22,8 +22,6 @@ export class GenConfig {
   serviceType?: 'function' | 'class' = 'function';
   /** 复杂类型命名空间 */
   namespace?: string = 'API';
-  /** 自动清除旧文件时忽略列表 */
-  ignoreDelete?: string[] = [];
   /** 数据处理钩子 */
   hook?: {
     /** 自定义函数名称 */

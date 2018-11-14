@@ -4,9 +4,12 @@ import { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts';
 import { s2o, fixRefSwagger, requestData } from './util';
 import { ServiceGenerator, GenConfig } from './ServiceGenerator';
 
-export interface CliConfig extends GenConfig {
+export class CliConfig extends GenConfig {
   api?: string;
   saveOpenAPIData?: boolean;
+  autoClear?: boolean = true;
+  /** 自动清除旧文件时忽略列表 */
+  ignoreDelete?: string[] = [];
 }
 
 export async function genSDK(cfg: string | CliConfig | CliConfig[]) {
@@ -30,7 +33,7 @@ export async function genSDK(cfg: string | CliConfig | CliConfig[]) {
 
   return Promise.all(configs.map(cfg => {
     cfg = {
-      ...new GenConfig,
+      ...new CliConfig,
       ...cfg,
     };
     cfg.sdkDir = getAbsolutePath(cfg.sdkDir);
@@ -42,7 +45,7 @@ export async function genSDK(cfg: string | CliConfig | CliConfig[]) {
 
 export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   config = {
-    ...new GenConfig,
+    ...new CliConfig,
     ...config,
   };
 
@@ -76,7 +79,7 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
     throw new Error('数据格式不正确，仅支持 OpenAPI 3.0/Swagger 2.0');
   }
 
-  if (fs.existsSync(config.sdkDir)) {
+  if (config.autoClear && fs.existsSync(config.sdkDir)) {
     fs.readdirSync(config.sdkDir).forEach((file) => {
       if (!['d.ts', '.ts', '.js'].some(ext => path.extname(file) === ext)) {
         return;
