@@ -1,9 +1,12 @@
 {% if genType === "ts" -%}
+// tslint:disable
 /// <reference path="./typings.d.ts" />
+{% else %}
+// eslint-disable
 {%- endif %}
 import request from './base';
 
-export class {{ className }}Service extends Base {
+export class {{ className }}Service {
 
   {% for api in list -%}
   /** {{ api.desc }} */
