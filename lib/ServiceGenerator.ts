@@ -31,6 +31,8 @@ export class GenConfig {
     /** 自定义类名 */
     customClassName?: (tagName: string) => string;
   } = {};
+  /** path过滤 */
+  filter?: (RegExp | ((data: APIDataType) => boolean))[];
 }
 
 export interface APIDataType extends OperationObject {
@@ -83,13 +85,23 @@ export class ServiceGenerator {
         }
       );
     }
-    this.getServiceTP().map(tp => {
-      this.genFileFromTemplate(
-        this.getFinalFileName(`${tp.className}.${this.config.type}`),
-        'service',
-        tp,
-      );
-    });
+    this.getServiceTP()
+      .filter(tp => {
+        tp.list = tp.list.filter(item =>
+          !this.config.filter || this.config.filter.some(f => {
+            return f instanceof RegExp ? f.test(item.path) :
+              typeof f === 'function' ? f(item) : true;
+          })
+        );
+        return tp.list.length;
+      })
+      .map(tp => {
+        this.genFileFromTemplate(
+          this.getFinalFileName(`${tp.className}.${this.config.type}`),
+          'service',
+          tp,
+        );
+      });
   }
 
   protected genRequestLib() {

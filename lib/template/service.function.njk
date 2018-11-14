@@ -1,5 +1,8 @@
 {% if genType === "ts" -%}
+// tslint:disable
 /// <reference path="./typings.d.ts" />
+{% else %}
+// eslint-disable
 {%- endif %}
 import request from './base';
 
