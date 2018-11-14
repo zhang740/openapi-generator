@@ -43,11 +43,11 @@ export interface TagAPIDataType {
 }
 
 export class ServiceGenerator {
-  private apiData: TagAPIDataType = {};
+  protected apiData: TagAPIDataType = {};
 
   constructor(
-    private config: GenConfig,
-    private openAPIData: OpenAPIObject,
+    protected config: GenConfig,
+    protected openAPIData: OpenAPIObject,
   ) {
     Object.keys(openAPIData.paths || {}).forEach(path => {
       const pathItem: PathItemObject = openAPIData.paths[path];
@@ -92,7 +92,7 @@ export class ServiceGenerator {
     });
   }
 
-  private genRequestLib() {
+  protected genRequestLib() {
     if (this.config.requestLib) {
       this.mkdir(this.config.sdkDir);
       const basePath = path.join(this.config.sdkDir, `base.${this.config.type}`);
@@ -106,7 +106,7 @@ export class ServiceGenerator {
     }
   }
 
-  private getInterfaceTP() {
+  protected getInterfaceTP() {
     const defines = this.openAPIData.components.schemas;
     return Object.keys(defines).map(typeName => {
       const props: SchemaObject = this.resolveRefObject(defines[typeName]);
@@ -134,7 +134,7 @@ export class ServiceGenerator {
     });
   }
 
-  private getServiceTP() {
+  protected getServiceTP() {
     return Object.keys(this.apiData).map(tag => {
 
       // functionName 防重
@@ -180,7 +180,7 @@ export class ServiceGenerator {
     });
   }
 
-  private getBodyTP(requestBody?: any) {
+  protected getBodyTP(requestBody?: any) {
     const reqBody: RequestBodyObject = this.resolveRefObject(requestBody);
     if (!reqBody) {
       return;
@@ -197,7 +197,7 @@ export class ServiceGenerator {
     };
   }
 
-  private getResponseTP(responses?: ResponsesObject) {
+  protected getResponseTP(responses?: ResponsesObject) {
     const response: ResponseObject = this.resolveRefObject(responses.default || responses['200']);
     const defaultResponse = {
       mediaType: '*/*',
@@ -218,7 +218,7 @@ export class ServiceGenerator {
     };
   }
 
-  private getParamsTP(parameters?: (ParameterObject | ReferenceObject)[]) {
+  protected getParamsTP(parameters?: (ParameterObject | ReferenceObject)[]) {
     if (!parameters || !parameters.length) {
       return;
     }
@@ -239,12 +239,12 @@ export class ServiceGenerator {
     return templateParams;
   }
 
-  private genFileFromTemplate(fileName: string, type: 'interface' | 'service', params: any) {
+  protected genFileFromTemplate(fileName: string, type: 'interface' | 'service', params: any) {
     const template = this.getTemplate(type);
     this.writeFile(fileName, nunjucks.renderString(template, params));
   }
 
-  private writeFile(fileName: string, content: string) {
+  protected writeFile(fileName: string, content: string) {
     const filePath = path.join(
       this.config.sdkDir,
       fileName,
@@ -253,7 +253,7 @@ export class ServiceGenerator {
     fs.writeFileSync(filePath, content, { encoding: 'utf8' });
   }
 
-  private getTemplate(type: 'interface' | 'service') {
+  protected getTemplate(type: 'interface' | 'service') {
     const configFilePath = type === 'interface' ? this.config.interfaceTemplatePath :
       this.config.templatePath;
 
@@ -274,7 +274,7 @@ export class ServiceGenerator {
     return fileContent;
   }
 
-  private resolveRefObject<T>(refObject: any): T {
+  protected resolveRefObject<T>(refObject: any): T {
     if (!refObject || !refObject.$ref) {
       return refObject;
     }
@@ -289,7 +289,7 @@ export class ServiceGenerator {
     }
   }
 
-  private getRefName(refObject: any) {
+  protected getRefName(refObject: any) {
     if (typeof refObject !== 'object' || !refObject.$ref) {
       return refObject;
     }
@@ -297,14 +297,14 @@ export class ServiceGenerator {
     return refPaths[refPaths.length - 1] as string;
   }
 
-  private mkdir(dir: string) {
+  protected mkdir(dir: string) {
     if (!fs.existsSync(dir)) {
       this.mkdir(path.dirname(dir));
       fs.mkdirSync(dir);
     }
   }
 
-  private getFinalFileName(fileName: string) {
+  protected getFinalFileName(fileName: string) {
     if (this.config.camelCase === true) {
       return this.toCamelCase(fileName);
     } else if (this.config.camelCase === 'lower') {
@@ -314,7 +314,7 @@ export class ServiceGenerator {
     return this.toHyphenCase(fileName);
   }
 
-  private toHyphenCase(s: string) {
+  protected toHyphenCase(s: string) {
     s = s.replace(/([A-Z])/g, '_$1').toLowerCase();
     if (s.startsWith('_')) {
       s = s.substr(1);
@@ -322,13 +322,13 @@ export class ServiceGenerator {
     return s;
   }
 
-  private toCamelCase(s: string) {
+  protected toCamelCase(s: string) {
     return s.replace(/_(\w)/g, function (_all, letter) {
       return letter.toUpperCase();
     });
   }
 
-  private getType(schemaObject: SchemaObject, namespace: string = ''): string {
+  protected getType(schemaObject: SchemaObject, namespace: string = ''): string {
     if (schemaObject.$ref) {
       return [namespace, this.getRefName(schemaObject)].filter(s => s).join('.');
     }

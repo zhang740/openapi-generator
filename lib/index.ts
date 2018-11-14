@@ -9,14 +9,24 @@ export interface CliConfig extends GenConfig {
   saveOpenAPIData?: boolean;
 }
 
-export async function genSDK(cfgPath: string) {
-  let configs: CliConfig[];
-  configs = require(cfgPath);
-  if ((configs as any).__esModule) {
-    configs = (configs as any).default;
-  }
-  configs = [].concat(configs);
-  console.log('[GenSDK] read config as js');
+export async function genSDK(cfg: string | CliConfig | CliConfig[]) {
+  let configs: CliConfig[] = [];
+
+  [].concat(cfg).forEach(c => {
+    if (typeof c === 'string') {
+      let cfgData = require(c);
+      if ((configs as any).__esModule) {
+        cfgData = (configs as any).default;
+      }
+      console.log('[GenSDK] read config:', c);
+      configs.push(...[].concat(cfgData));
+    } else if (typeof c === 'object') {
+      console.log('[GenSDK] load config.');
+      configs.push(c);
+    } else {
+      throw new Error(`[GenSDK] fail load config: ${c}`);
+    }
+  });
 
   return Promise.all(configs.map(cfg => {
     cfg = {
