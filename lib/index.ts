@@ -40,10 +40,8 @@ export async function genSDK(cfg: string | CliConfig | CliConfig[]) {
   }));
 }
 
-export async function genFromUrl(config: CliConfig) {
-  console.log('[GenSDK] load', config.api);
-  let data: OpenAPIObject = JSON.parse(await requestData(config.api));
-
+export async function genFromData(config: CliConfig, data: OpenAPIObject) {
+  console.log('[GenSDK] load from data');
   if (!data || !data.paths || !data.info) {
     throw new Error('数据格式不正确');
   }
@@ -96,6 +94,11 @@ export async function genFromUrl(config: CliConfig) {
 
   const generator = new ServiceGenerator(config, data);
   generator.genFile();
+}
+
+export async function genFromUrl(config: CliConfig) {
+  console.log('[GenSDK] load', config.api);
+  return genFromData(config, JSON.parse(await requestData(config.api)));
 }
 
 function getAbsolutePath(filePath: string) {
