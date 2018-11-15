@@ -74,6 +74,7 @@ export class ServiceGenerator {
     this.genRequestLib();
 
     if (this.config.type === 'ts') {
+      console.log('[GenSDK] gen interface.');
       this.genFileFromTemplate(
         'typings.d.ts',
         'interface',
@@ -94,6 +95,7 @@ export class ServiceGenerator {
         return tp.list.length;
       })
       .map(tp => {
+        console.log('[GenSDK] generate service:', tp.className);
         this.genFileFromTemplate(
           this.getFinalFileName(`${tp.className}.${this.config.type}`),
           'service',
@@ -117,36 +119,37 @@ export class ServiceGenerator {
   }
 
   protected getInterfaceTP() {
-    const defines = this.openAPIData.components.schemas;
-    return Object.keys(defines).map(typeName => {
-      const props: SchemaObject = this.resolveRefObject(defines[typeName]);
+    const components = this.openAPIData.components;
+    const data = [components.schemas].map(defines => {
+      return Object.keys(defines).map(typeName => {
+        const props: SchemaObject = this.resolveRefObject(defines[typeName]);
+        if (props.type !== 'object') {
+          throw new Error(`Unsupported interface type: ${typeName}: ${props.type}`);
+        }
 
-      if (props.type !== 'object') {
-        throw new Error(`Unsupported interface type: ${typeName}: ${props.type}`);
-      }
+        const requiredPropKeys = props.required || [];
 
-      const requiredPropKeys = props.required || [];
-
-      return {
-        typeName,
-        type: this.getType(props),
-        props: props.properties && Object.keys(props.properties).map(propName => {
-          const propSchema: SchemaObject = props.properties[propName];
-          return {
-            ...propSchema,
-            name: propName,
-            type: this.getType(propSchema),
-            desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
-            required: requiredPropKeys.some(key => key === propName)
-          };
-        }),
-      };
+        return {
+          typeName,
+          type: this.getType(props),
+          props: props.properties && Object.keys(props.properties).map(propName => {
+            const propSchema: SchemaObject = props.properties[propName];
+            return {
+              ...propSchema,
+              name: propName,
+              type: this.getType(propSchema),
+              desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
+              required: requiredPropKeys.some(key => key === propName)
+            };
+          }),
+        };
+      });
     });
+    return data.reduce((p, c) => p.concat(c), []);
   }
 
   protected getServiceTP() {
     return Object.keys(this.apiData).map(tag => {
-
       // functionName 防重
       const tmpFunctionRD: { [key: string]: number } = {};
 
@@ -233,17 +236,17 @@ export class ServiceGenerator {
       return;
     }
     const templateParams: { [key: string]: ParameterObject[] } = {};
-    ['query', 'header', 'path', 'cookie'].forEach(where => {
+    ['query', 'header', 'path', 'cookie'].forEach(source => {
       const params = parameters
         .map(p => this.resolveRefObject<ParameterObject>(p))
-        .filter((p: ParameterObject) => p.in === where)
+        .filter((p: ParameterObject) => p.in === source)
         .map(p => ({
           ...p,
           type: this.getType(p.schema, this.config.namespace),
         }));
 
       if (params.length) {
-        templateParams[where] = params;
+        templateParams[source] = params;
       }
     });
     return templateParams;
@@ -295,6 +298,9 @@ export class ServiceGenerator {
       refPaths.forEach((node: any) => {
         obj = obj[node];
       });
+      if (!obj) {
+        throw new Error(`[GenSDK] Data Error! Notfoud: ${refObject.$ref}`);
+      }
       return obj.$ref ? this.resolveRefObject(obj) : obj;
     }
   }
@@ -343,7 +349,13 @@ export class ServiceGenerator {
       return [namespace, this.getRefName(schemaObject)].filter(s => s).join('.');
     }
 
-    switch (schemaObject && schemaObject.type) {
+    let type = schemaObject.type;
+
+    if (schemaObject.enum) {
+      type = 'enum';
+    }
+
+    switch (type) {
       case 'number':
       case 'int':
       case 'integer':
@@ -355,6 +367,7 @@ export class ServiceGenerator {
       case 'Date':
       case 'date':
       case 'dateTime':
+      case 'date-time':
       case 'datetime':
         return 'Date';
 
@@ -364,15 +377,17 @@ export class ServiceGenerator {
       case 'url':
       case 'byte':
       case 'binary':
-        return schemaObject.enum ?
-          schemaObject.enum.map(v => `"${v.replace(/"/g, '\"')}"`).join(' | ') || 'string'
-          : 'string';
+        return 'string';
 
       case 'boolean':
         return 'boolean';
 
       case 'array':
         return `${this.getType(schemaObject.items, namespace)}[]`;
+
+      /** 以下非标准 */
+      case 'enum':
+        return schemaObject.enum.map(v => `"${v.replace(/"/g, '\"')}"`).join(' | ') || 'string';
 
       default:
         return 'any';

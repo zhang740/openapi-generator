@@ -63,7 +63,7 @@ export async function {{ api.functionName }}(
 {%- endif %}
 ){{ (": Promise<" + api.response.type + ">") | safe if genType === "ts" }} {
   {% if api.params and api.params.path -%}
-  const { {% for param in api.params.path %}{{ param.name }}{% endfor %} } = params;
+  const { {% for param in api.params.path %}{{ param.name }}, {% endfor %} } = params;
   {% endif -%}
   return request(`{{ api.path | safe }}`, {
     method: `{{ api.method | upper }}`,

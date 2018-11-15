@@ -55,24 +55,7 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   }
 
   if (data.swagger === '2.0') {
-    fixRefSwagger(data);
-    data = await s2o(data);
-
-    Object.keys(data.paths).forEach((p) => {
-      const pathItem: PathItemObject = data.paths[p];
-      Object.keys(pathItem).forEach((key) => {
-        const method: OperationObject = pathItem[key];
-        if (method && method.tags && method.tags.length) {
-          method.tags = method.tags.map((tag) => {
-            const tagItem = data.tags!.find((t) => t.name === tag);
-            if (!tagItem || !tagItem.description) {
-              return tag;
-            }
-            return tagItem.description.replace(/ /g, '');
-          });
-        }
-      });
-    });
+    data = await convertSwagger2OpenAPI(data);
   }
 
   if (!data.openapi || !data.openapi.startsWith('3.')) {
@@ -102,6 +85,29 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
 
   const generator = new ServiceGenerator(config, data);
   generator.genFile();
+}
+
+export async function convertSwagger2OpenAPI(data: OpenAPIObject) {
+  fixRefSwagger(data);
+  data = await s2o(data);
+
+  Object.keys(data.paths).forEach((p) => {
+    const pathItem: PathItemObject = data.paths[p];
+    Object.keys(pathItem).forEach((key) => {
+      const method: OperationObject = pathItem[key];
+      if (method && method.tags && method.tags.length) {
+        method.tags = method.tags.map((tag) => {
+          const tagItem = data.tags!.find((t) => t.name === tag);
+          if (!tagItem || !tagItem.description) {
+            return tag;
+          }
+          return tagItem.description.replace(/ /g, '');
+        });
+      }
+    });
+  });
+
+  return data;
 }
 
 export async function genFromUrl(config: CliConfig) {
