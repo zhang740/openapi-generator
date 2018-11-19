@@ -107,9 +107,10 @@ export class ServiceGenerator {
   protected genRequestLib() {
     if (this.config.requestLib) {
       this.mkdir(this.config.sdkDir);
-      const basePath = path.join(this.config.sdkDir, `base.${this.config.type}`);
-      if (!fs.existsSync(basePath)) {
-        fs.writeFileSync(basePath, nunjucks.renderString(
+      const reqLibPath = path.join(this.config.sdkDir, `base.${this.config.type}`);
+
+      if (!fs.existsSync(reqLibPath)) {
+        fs.writeFileSync(reqLibPath, nunjucks.renderString(
           fs.readFileSync(path.join(
             __dirname, 'template', 'base.njk',
           ), 'utf8'), { genType: this.config.type }

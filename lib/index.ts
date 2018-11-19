@@ -64,7 +64,10 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
 
   if (config.autoClear && fs.existsSync(config.sdkDir)) {
     fs.readdirSync(config.sdkDir).forEach((file) => {
-      if (!['d.ts', '.ts', '.js'].some(ext => path.extname(file) === ext)) {
+      if (
+        !['d.ts', '.ts', '.js'].some(ext => path.extname(file) === ext) ||
+        (config.requestLib && file.startsWith('base.'))
+      ) {
         return;
       }
       const absoluteFilePath = path.join(config.sdkDir, '/', file);
