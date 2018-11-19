@@ -1,4 +1,10 @@
 
+0.1.11 / 2018-11-19
+==================
+
+  * fix: remove service file exclude request lib.
+  * feat: cli support read json data.
+
 0.1.10 / 2018-11-15
 ==================
 
