@@ -30,7 +30,16 @@ test('enum', t => {
   t.deepEqual(gen.getType({ type: 'string', enum: ['open', 'close'] }), `"open" | "close"`);
 });
 
+test('enum, degrade', t => {
+  t.deepEqual(gen.getType({ type: 'enum' }), 'string');
+  t.deepEqual(gen.getType({ type: 'enum', enum: ['open', { type: 'number' }] }), '"open" | number');
+});
+
 test('array, base type', t => {
   t.deepEqual(gen.getType({ type: 'array', items: { type: 'string' } }), 'string[]');
   t.deepEqual(gen.getType({ type: 'array', items: { type: 'long' } }), 'number[]');
+});
+
+test('array, degrade', t => {
+  t.deepEqual(gen.getType({ type: 'array' }), 'any[]');
 });

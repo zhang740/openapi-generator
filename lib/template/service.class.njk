@@ -6,7 +6,7 @@
 {%- endif %}
 import request from './base';
 
-export class {{ className }}Service {
+export class {{ className }} {
 
   {% for api in list -%}
   /** {{ api.desc }} */
@@ -89,5 +89,5 @@ export class {{ className }}Service {
 
 }
 
-export const {{ instanceName }}Service = new {{ className }}Service();
-export default new {{ className }}Service();
+export const {{ instanceName }} = new {{ className }}();
+export default new {{ className }}();

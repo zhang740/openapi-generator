@@ -123,27 +123,32 @@ export class ServiceGenerator {
     const components = this.openAPIData.components;
     const data = [components.schemas].map(defines => {
       return Object.keys(defines).map(typeName => {
-        const props: SchemaObject = this.resolveRefObject(defines[typeName]);
-        if (props.type !== 'object') {
-          throw new Error(`Unsupported interface type: ${typeName}: ${props.type}`);
+        try {
+          const props: SchemaObject = this.resolveRefObject(defines[typeName]);
+          if (props.type !== 'object') {
+            throw new Error(`Unsupported interface type: ${typeName}: ${props.type}`);
+          }
+
+          const requiredPropKeys = props.required || [];
+
+          return {
+            typeName,
+            type: this.getType(props),
+            props: props.properties && Object.keys(props.properties).map(propName => {
+              const propSchema: SchemaObject = props.properties[propName];
+              return {
+                ...propSchema,
+                name: propName,
+                type: this.getType(propSchema),
+                desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
+                required: requiredPropKeys.some(key => key === propName)
+              };
+            }),
+          };
+        } catch (error) {
+          console.warn('[GenSDK] gen service param error:', error);
+          throw error;
         }
-
-        const requiredPropKeys = props.required || [];
-
-        return {
-          typeName,
-          type: this.getType(props),
-          props: props.properties && Object.keys(props.properties).map(propName => {
-            const propSchema: SchemaObject = props.properties[propName];
-            return {
-              ...propSchema,
-              name: propName,
-              type: this.getType(propSchema),
-              desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
-              required: requiredPropKeys.some(key => key === propName)
-            };
-          }),
-        };
       });
     });
     return data.reduce((p, c) => p.concat(c), []);
@@ -155,32 +160,37 @@ export class ServiceGenerator {
       const tmpFunctionRD: { [key: string]: number } = {};
 
       const genParams = this.apiData[tag].map(api => {
-        const params = this.getParamsTP(api.parameters);
-        const body = this.getBodyTP(api.requestBody);
-        const response = this.getResponseTP(api.responses);
+        try {
+          const params = this.getParamsTP(api.parameters);
+          const body = this.getBodyTP(api.requestBody);
+          const response = this.getResponseTP(api.responses);
 
-        let functionName = this.config.hook.customFunctionName ?
-          this.config.hook.customFunctionName(api) : api.operationId;
+          let functionName = this.config.hook.customFunctionName ?
+            this.config.hook.customFunctionName(api) : api.operationId;
 
-        if (tmpFunctionRD[functionName]) {
-          functionName = `${functionName}_${tmpFunctionRD[functionName]++}`;
-        } else {
-          tmpFunctionRD[functionName] = 1;
+          if (tmpFunctionRD[functionName]) {
+            functionName = `${functionName}_${tmpFunctionRD[functionName]++}`;
+          } else {
+            tmpFunctionRD[functionName] = 1;
+          }
+
+          return {
+            ...api,
+            functionName,
+            path: api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
+              return `\$\{${str}\}`;
+            }),
+            method: api.method,
+            desc: [api.summary, api.description].filter(s => s).join(' '),
+            hasHeader: !!(params && params.header) || !!(body && body.mediaType),
+            params,
+            body,
+            response,
+          };
+        } catch (error) {
+          console.warn('[GenSDK] gen service param error:', error);
+          throw error;
         }
-
-        return {
-          ...api,
-          functionName,
-          path: api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
-            return `\$\{${str}\}`;
-          }),
-          method: api.method,
-          desc: [api.summary, api.description].filter(s => s).join(' '),
-          hasHeader: !!(params && params.header) || !!(body && body.mediaType),
-          params,
-          body,
-          response,
-        };
       });
 
       const className = this.config.hook.customClassName ?
@@ -254,8 +264,13 @@ export class ServiceGenerator {
   }
 
   protected genFileFromTemplate(fileName: string, type: 'interface' | 'service', params: any) {
-    const template = this.getTemplate(type);
-    this.writeFile(fileName, nunjucks.renderString(template, params));
+    try {
+      const template = this.getTemplate(type);
+      this.writeFile(fileName, nunjucks.renderString(template, params));
+    } catch (error) {
+      console.warn('[GenSDK] file gen fail:', fileName, 'type:', type);
+      throw error;
+    }
   }
 
   protected writeFile(fileName: string, content: string) {
@@ -270,22 +285,26 @@ export class ServiceGenerator {
   protected getTemplate(type: 'interface' | 'service') {
     const configFilePath = type === 'interface' ? this.config.interfaceTemplatePath :
       this.config.templatePath;
-
-    if (configFilePath) {
-      this.mkdir(path.dirname(configFilePath));
-      if (fs.existsSync(configFilePath)) {
-        return fs.readFileSync(configFilePath, 'utf8');
+    try {
+      if (configFilePath) {
+        this.mkdir(path.dirname(configFilePath));
+        if (fs.existsSync(configFilePath)) {
+          return fs.readFileSync(configFilePath, 'utf8');
+        }
       }
-    }
 
-    const fileContent = fs.readFileSync(path.join(
-      __dirname, 'template',
-      type === 'service' ? `${type}.${this.config.serviceType}.njk` : `${type}.njk`,
-    ), 'utf8');
-    if (configFilePath) {
-      fs.writeFileSync(configFilePath, fileContent, 'utf8');
+      const fileContent = fs.readFileSync(path.join(
+        __dirname, 'template',
+        type === 'service' ? `${type}.${this.config.serviceType}.njk` : `${type}.njk`,
+      ), 'utf8');
+      if (configFilePath) {
+        fs.writeFileSync(configFilePath, fileContent, 'utf8');
+      }
+      return fileContent;
+    } catch (error) {
+      console.warn(`[GenSDK] get {${type}} template fail:`, configFilePath);
+      throw error;
     }
-    return fileContent;
   }
 
   protected resolveRefObject<T>(refObject: any): T {
@@ -346,6 +365,12 @@ export class ServiceGenerator {
   }
 
   protected getType(schemaObject: SchemaObject, namespace: string = ''): string {
+    if (!schemaObject) {
+      return 'any';
+    }
+    if (typeof schemaObject !== 'object') {
+      return schemaObject;
+    }
     if (schemaObject.$ref) {
       return [namespace, this.getRefName(schemaObject)].filter(s => s).join('.');
     }
@@ -388,7 +413,16 @@ export class ServiceGenerator {
 
       /** 以下非标准 */
       case 'enum':
-        return schemaObject.enum.map(v => `"${v.replace(/"/g, '\"')}"`).join(' | ') || 'string';
+        return Array.isArray(schemaObject.enum) ?
+          Array.from(
+            new Set(
+              schemaObject.enum.map(
+                v => typeof v === 'string' ?
+                  `"${v.replace(/"/g, '\"')}"` : this.getType(v)
+              )
+            )
+          ).join(' | ')
+          : 'string';
 
       default:
         return 'any';
