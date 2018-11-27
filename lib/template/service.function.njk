@@ -58,7 +58,15 @@ export async function {{ api.functionName }}(
 {%- if api.body %}
   body
   {%- if genType === "ts" -%}
-  : {{ api.body.type }}
+  : {% if api.body.propertiesList %}{
+    {%- for prop in api.body.propertiesList %}
+    {% if prop.schema.description -%}
+    /** {{ prop.schema.description }} */
+    {% endif -%}
+    {{ prop.key }}{{ "?" if not prop.schema.requird }}: {{ prop.schema.type }},
+    {%- endfor %}
+  }
+  {%- endif -%}
   {%- endif -%}
 {%- endif %}
 ){{ (": Promise<" + api.response.type + ">") | safe if genType === "ts" }} {

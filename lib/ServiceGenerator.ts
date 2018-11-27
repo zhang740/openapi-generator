@@ -214,7 +214,16 @@ export class ServiceGenerator {
       return;
     }
     const mediaType = Object.keys(reqContent)[0];
-    const schema = reqContent[mediaType].schema;
+    const schema: SchemaObject = reqContent[mediaType].schema;
+    if (schema.type === 'object' && schema.properties) {
+      return {
+        mediaType,
+        ...schema,
+        propertiesList: Object.keys(schema.properties).map(p => ({
+          key: p, schema: schema.properties[p],
+        }))
+      };
+    }
     return {
       mediaType,
       type: this.getType(schema, this.config.namespace),
