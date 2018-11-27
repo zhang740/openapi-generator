@@ -68,6 +68,8 @@ export class {{ className }} {
       {{ prop.key }}{{ "?" if not prop.schema.requird }}: {{ prop.schema.type }},
       {%- endfor %}
     }
+    {%- else -%}
+    {{ api.body.type }}
     {%- endif -%}
     {%- endif -%}
   {%- endif %}
