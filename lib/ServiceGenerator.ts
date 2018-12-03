@@ -221,7 +221,11 @@ export class ServiceGenerator {
         mediaType,
         ...schema,
         propertiesList: Object.keys(schema.properties).map(p => ({
-          key: p, schema: schema.properties[p],
+          key: p,
+          schema: {
+            ...schema.properties[p],
+            type: this.getType(schema.properties[p])
+          }
         }))
       };
     }

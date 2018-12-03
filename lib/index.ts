@@ -49,7 +49,6 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
     ...config,
   };
 
-  console.log('[GenSDK] load from data');
   if (!data || !data.paths || !data.info) {
     throw new Error('数据格式不正确');
   }
