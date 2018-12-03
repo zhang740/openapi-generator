@@ -37,17 +37,6 @@ Config interface:
 ```ts
 interface CliConfig {
   api: string;
-  /** dir for openapi-generator */
-  sdkDir: string;
-  /** path for template */
-  templatePath: string;
-  /** filename style, true 为大驼峰，lower 为小驼峰 */
-  camelCase?: boolean | 'lower' = false;
-  /** gen type */
-  type?: 'ts' | 'js' = 'ts';
-}
-interface CliConfig {
-  api: string;
 
   /** dir for openapi-generator */
   sdkDir: string;
