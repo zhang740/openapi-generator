@@ -121,8 +121,7 @@ export async function genFromUrl(config: CliConfig) {
 function getAbsolutePath(filePath: string) {
   return filePath ?
     path.isAbsolute(filePath) ?
-      path.join(process.cwd(), filePath) :
-      filePath
+      filePath : path.join(process.cwd(), filePath)
     : filePath;
 }
 

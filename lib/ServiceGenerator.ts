@@ -1,3 +1,4 @@
+const debug = require('debug')('openapi-generator');
 import * as fs from 'fs';
 import * as path from 'path';
 import * as nunjucks from 'nunjucks';
@@ -74,7 +75,7 @@ export class ServiceGenerator {
     this.genRequestLib();
 
     if (this.config.type === 'ts') {
-      console.log('[GenSDK] gen interface.');
+      debug('[GenSDK] gen interface.');
       this.genFileFromTemplate(
         'typings.d.ts',
         'interface',
@@ -95,7 +96,7 @@ export class ServiceGenerator {
         return tp.list.length;
       })
       .map(tp => {
-        console.log('[GenSDK] generate service:', tp.className);
+        debug('[GenSDK] generate service:', tp.className);
         this.genFileFromTemplate(
           this.getFinalFileName(`${tp.className}.${this.config.type}`),
           'service',
