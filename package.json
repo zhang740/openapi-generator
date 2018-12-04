@@ -1,6 +1,6 @@
 {
   "name": "openapi-generator",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
