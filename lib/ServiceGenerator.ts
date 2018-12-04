@@ -100,7 +100,10 @@ export class ServiceGenerator {
         this.genFileFromTemplate(
           this.getFinalFileName(`${tp.className}.${this.config.type}`),
           'service',
-          tp,
+          {
+            namespace: this.config.namespace,
+            ...tp,
+          },
         );
       });
   }
