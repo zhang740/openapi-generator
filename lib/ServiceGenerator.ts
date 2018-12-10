@@ -5,6 +5,7 @@ import * as nunjucks from 'nunjucks';
 import {
   OpenAPIObject, SchemaObject, ReferenceObject, ParameterObject, RequestBodyObject, ContentObject, ResponseObject, ResponsesObject, OperationObject, PathItemObject,
 } from 'openapi3-ts';
+import { CommonError } from './util';
 
 export class GenConfig {
   /** 生成目录 */
@@ -130,7 +131,7 @@ export class ServiceGenerator {
         try {
           const props: SchemaObject = this.resolveRefObject(defines[typeName]);
           if (props.type !== 'object') {
-            throw new Error(`Unsupported interface type: ${typeName}: ${props.type}`);
+            throw new CommonError(`Unsupported interface type: ${typeName}: ${props.type}`);
           }
 
           const requiredPropKeys = props.required || [];
@@ -227,7 +228,7 @@ export class ServiceGenerator {
           key: p,
           schema: {
             ...schema.properties[p],
-            type: this.getType(schema.properties[p])
+            type: this.getType(schema.properties[p], this.config.namespace)
           }
         }))
       };

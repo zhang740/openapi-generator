@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts';
-import { s2o, fixRefSwagger, requestData } from './util';
+import { s2o, fixSwagger, fixOpenAPI, requestData, CommonError } from './util';
 import { ServiceGenerator, GenConfig } from './ServiceGenerator';
 
 export class CliConfig extends GenConfig {
@@ -21,13 +21,11 @@ export async function genSDK(cfg: string | CliConfig | CliConfig[]) {
       if ((configs as any).__esModule) {
         cfgData = (configs as any).default;
       }
-      console.log('[GenSDK] read config:', c);
       configs.push(...[].concat(cfgData));
     } else if (typeof c === 'object') {
-      console.log('[GenSDK] load config.');
       configs.push(c);
     } else {
-      throw new Error(`[GenSDK] fail load config: ${c}`);
+      throw new CommonError(`fail load config: ${c}`);
     }
   });
 
@@ -50,7 +48,7 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   };
 
   if (!data || !data.paths || !data.info) {
-    throw new Error('数据格式不正确');
+    throw new CommonError('数据格式不正确');
   }
 
   if (data.swagger === '2.0') {
@@ -58,7 +56,7 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   }
 
   if (!data.openapi || !data.openapi.startsWith('3.')) {
-    throw new Error('数据格式不正确，仅支持 OpenAPI 3.0/Swagger 2.0');
+    throw new CommonError('数据格式不正确，仅支持 OpenAPI 3.0/Swagger 2.0');
   }
 
   if (config.autoClear && fs.existsSync(config.sdkDir)) {
@@ -90,8 +88,9 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
 }
 
 export async function convertSwagger2OpenAPI(data: OpenAPIObject) {
-  fixRefSwagger(data);
+  fixSwagger(data);
   data = await s2o(data);
+  fixOpenAPI(data);
 
   Object.keys(data.paths).forEach((p) => {
     const pathItem: PathItemObject = data.paths[p];
@@ -113,7 +112,6 @@ export async function convertSwagger2OpenAPI(data: OpenAPIObject) {
 }
 
 export async function genFromUrl(config: CliConfig) {
-  console.log('[GenSDK] load', config.api);
   return genFromData(config, JSON.parse(await requestData(config.api)));
 }
 

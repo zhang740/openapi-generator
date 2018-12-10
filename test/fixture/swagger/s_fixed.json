@@ -43,7 +43,7 @@
           "200": {
             "description": "OK",
             "schema": {
-              "$ref": "#/definitions/DTO_0"
+              "$ref": "#/definitions/ResultDTO_Map_string_string__"
             }
           },
           "401": {
@@ -60,7 +60,7 @@
     }
   },
   "definitions": {
-    "DTO_0": {
+    "ResultDTO_Map_string_string__": {
       "type": "object",
       "properties": {
         "data": {

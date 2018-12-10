@@ -1,22 +1,11 @@
-const validTypeName = /^[a-zA-Z0-9_]*$/;
-const prefix = '#/definitions/';
+import { CommonError } from './error';
+import { renameTypePrefix } from './const';
 
-export function fixRefSwagger(data: any) {
+const swaggerDefPrefix = '#/definitions/';
+
+export function fixSwagger(data: any) {
   fixRefName(data);
   fixRequestBody(data);
-}
-
-function findRef(object: any) {
-  if (object.$ref) {
-    return [object];
-  }
-  const list: any[] = [];
-  Object.keys(object).forEach(key => {
-    if (typeof object === 'object') {
-      list.push(...findRef(object[key]));
-    }
-  });
-  return list;
 }
 
 function fixRefName(data: any) {
@@ -28,10 +17,10 @@ function fixRefName(data: any) {
   findRef(data).forEach(refItem => {
     const $ref: string = refItem.$ref;
 
-    if (!$ref.startsWith(prefix)) {
-      throw new Error(`未实现解析: ${$ref}`);
+    if (!$ref.startsWith(swaggerDefPrefix)) {
+      throw new CommonError(`未实现解析: ${$ref}`);
     }
-    const key = $ref.replace(prefix, '');
+    const key = $ref.replace(swaggerDefPrefix, '');
     if (!refMap[key]) {
       console.warn(`未找到类型定义: ${$ref}`);
       delete refItem.$ref;
@@ -43,15 +32,15 @@ function fixRefName(data: any) {
 
   let count = 0;
   Object.keys(refMap).forEach(key => {
-    if (!validTypeName.test(key)) {
-      let newName = key.replace(/«/g, '_').replace(/»/g, '_');
-      newName = validTypeName.test(newName) ? newName : `DTO_${count}`;
+    if (!/^[a-zA-Z0-9_]*$/g.test(key)) {
+      let newName = key.replace(/[^a-zA-Z0-9_]/g, '_');
+      newName = data.definitions[newName] ? `${renameTypePrefix}${count}` : newName;
 
       data.definitions[newName] = data.definitions[key];
       delete data.definitions[key];
 
       refMap[key].forEach(refItem => {
-        refItem.$ref = `${prefix}${newName}`;
+        refItem.$ref = `${swaggerDefPrefix}${newName}`;
       });
       count++;
     }
@@ -102,4 +91,17 @@ function fixRequestBody(data: any) {
       }
     });
   });
+}
+
+function findRef(object: any) {
+  if (object.$ref) {
+    return [object];
+  }
+  const list: any[] = [];
+  Object.keys(object).forEach(key => {
+    if (typeof object === 'object') {
+      list.push(...findRef(object[key]));
+    }
+  });
+  return list;
 }
