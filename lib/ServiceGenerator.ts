@@ -161,42 +161,47 @@ export class ServiceGenerator {
 
   protected getServiceTP() {
     return Object.keys(this.apiData).map(tag => {
-      // functionName 防重
+      // functionName tag级别防重
       const tmpFunctionRD: { [key: string]: number } = {};
 
-      const genParams = this.apiData[tag].map(api => {
-        try {
-          const params = this.getParamsTP(api.parameters);
-          const body = this.getBodyTP(api.requestBody);
-          const response = this.getResponseTP(api.responses);
+      const genParams = this.apiData[tag]
+        .filter(api => {
+          // 暂不支持变量
+          return !api.path.includes('${');
+        })
+        .map(api => {
+          try {
+            const params = this.getParamsTP(api.parameters);
+            const body = this.getBodyTP(api.requestBody);
+            const response = this.getResponseTP(api.responses);
 
-          let functionName = this.config.hook.customFunctionName ?
-            this.config.hook.customFunctionName(api) : api.operationId;
+            let functionName = this.config.hook.customFunctionName ?
+              this.config.hook.customFunctionName(api) : api.operationId;
 
-          if (tmpFunctionRD[functionName]) {
-            functionName = `${functionName}_${tmpFunctionRD[functionName]++}`;
-          } else {
-            tmpFunctionRD[functionName] = 1;
+            if (tmpFunctionRD[functionName]) {
+              functionName = `${functionName}_${tmpFunctionRD[functionName]++}`;
+            } else {
+              tmpFunctionRD[functionName] = 1;
+            }
+
+            return {
+              ...api,
+              functionName,
+              path: api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
+                return `\$\{${str}\}`;
+              }),
+              method: api.method,
+              desc: [api.summary, api.description].filter(s => s).join(' '),
+              hasHeader: !!(params && params.header) || !!(body && body.mediaType),
+              params,
+              body,
+              response,
+            };
+          } catch (error) {
+            console.warn('[GenSDK] gen service param error:', error);
+            throw error;
           }
-
-          return {
-            ...api,
-            functionName,
-            path: api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
-              return `\$\{${str}\}`;
-            }),
-            method: api.method,
-            desc: [api.summary, api.description].filter(s => s).join(' '),
-            hasHeader: !!(params && params.header) || !!(body && body.mediaType),
-            params,
-            body,
-            response,
-          };
-        } catch (error) {
-          console.warn('[GenSDK] gen service param error:', error);
-          throw error;
-        }
-      });
+        });
 
       const className = this.config.hook.customClassName ?
         this.config.hook.customClassName(tag) : this.toCamelCase(tag);
@@ -394,6 +399,15 @@ export class ServiceGenerator {
     }
 
     let type = schemaObject.type;
+
+    switch (schemaObject.format) {
+      case 'float':
+      case 'double':
+      case 'int32':
+      case 'int64':
+        type = 'number';
+        break;
+    }
 
     if (schemaObject.enum) {
       type = 'enum';

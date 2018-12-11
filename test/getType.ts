@@ -12,6 +12,8 @@ test('base type', t => {
   t.deepEqual(gen.getType({ type: 'float' }), 'number');
   t.deepEqual(gen.getType({ type: 'double' }), 'number');
 
+  t.deepEqual(gen.getType({ type: 'string', format: 'int32' }), 'number');
+
   // string
   t.deepEqual(gen.getType({ type: 'string' }), 'string');
   t.deepEqual(gen.getType({ type: 'byte' }), 'string');

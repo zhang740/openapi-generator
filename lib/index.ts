@@ -48,11 +48,23 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   };
 
   if (!data || !data.paths || !data.info) {
-    throw new CommonError('数据格式不正确');
+    throw new CommonError(`数据格式不正确 ${config.api}`);
+  }
+
+  mkdir(config.sdkDir);
+
+  if (config.saveOpenAPIData) {
+    fs.writeFileSync(
+      path.join(config.sdkDir, 'origin.json'),
+      JSON.stringify(data, null, 2),
+      'utf8'
+    );
   }
 
   if (data.swagger === '2.0') {
     data = await convertSwagger2OpenAPI(data);
+  } else {
+    fixOpenAPI(data);
   }
 
   if (!data.openapi || !data.openapi.startsWith('3.')) {
@@ -75,7 +87,6 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   }
 
   if (config.saveOpenAPIData) {
-    mkdir(config.sdkDir);
     fs.writeFileSync(
       path.join(config.sdkDir, 'oas.json'),
       JSON.stringify(data, null, 2),
@@ -112,7 +123,12 @@ export async function convertSwagger2OpenAPI(data: OpenAPIObject) {
 }
 
 export async function genFromUrl(config: CliConfig) {
-  return genFromData(config, JSON.parse(await requestData(config.api)));
+  try {
+    const data = await JSON.parse(await requestData(config.api));
+    return genFromData(config, data);
+  } catch (error) {
+    console.warn(config.api, error);
+  }
 }
 
 function getAbsolutePath(filePath: string) {
