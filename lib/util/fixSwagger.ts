@@ -1,5 +1,5 @@
 import { CommonError } from './error';
-import { renameTypePrefix } from './const';
+import { renameTypePrefix, testTypeNameValid } from './const';
 
 const swaggerDefPrefix = '#/definitions/';
 
@@ -32,9 +32,11 @@ function fixRefName(data: any) {
 
   let count = 0;
   Object.keys(refMap).forEach(key => {
-    if (!/^[a-zA-Z0-9_]*$/g.test(key)) {
+    if (!testTypeNameValid(key)) {
       let newName = key.replace(/[^a-zA-Z0-9_]/g, '_');
-      newName = data.definitions[newName] ? `${renameTypePrefix}${count}` : newName;
+      newName = data.definitions[newName]
+        ? `${renameTypePrefix}${count}`
+        : newName;
 
       data.definitions[newName] = data.definitions[key];
       delete data.definitions[key];
@@ -77,7 +79,9 @@ function fixRequestBody(data: any) {
                   required: true,
                   schema: {
                     type: 'object',
-                    required: bodyParams.filter(p => p.required).map(p => p.name),
+                    required: bodyParams
+                      .filter(p => p.required)
+                      .map(p => p.name),
                     properties
                   }
                 });
@@ -85,7 +89,9 @@ function fixRequestBody(data: any) {
             break;
 
           default:
-            bodyParams.forEach(p => { p.in = 'query'; });
+            bodyParams.forEach(p => {
+              p.in = 'query';
+            });
             break;
         }
       }

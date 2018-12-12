@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts';
+import { OpenAPIObject } from 'openapi3-ts';
 import { s2o, fixSwagger, fixOpenAPI, requestData, CommonError } from './util';
 import { ServiceGenerator, GenConfig } from './ServiceGenerator';
 
@@ -102,23 +102,6 @@ export async function convertSwagger2OpenAPI(data: OpenAPIObject) {
   fixSwagger(data);
   data = await s2o(data);
   fixOpenAPI(data);
-
-  Object.keys(data.paths).forEach((p) => {
-    const pathItem: PathItemObject = data.paths[p];
-    Object.keys(pathItem).forEach((key) => {
-      const method: OperationObject = pathItem[key];
-      if (method && method.tags && method.tags.length) {
-        method.tags = method.tags.map((tag) => {
-          const tagItem = data.tags!.find((t) => t.name === tag);
-          if (!tagItem || !tagItem.description) {
-            return tag;
-          }
-          return tagItem.description.replace(/ /g, '');
-        });
-      }
-    });
-  });
-
   return data;
 }
 

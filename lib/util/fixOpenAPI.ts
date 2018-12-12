@@ -1,4 +1,10 @@
-import { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts';
+import {
+  OpenAPIObject,
+  PathItemObject,
+  OperationObject,
+  TagObject
+} from 'openapi3-ts';
+import { testTypeNameValid } from './const';
 
 export function fixOpenAPI(data: OpenAPIObject) {
   fixTag(data);
@@ -8,19 +14,35 @@ export function fixOpenAPI(data: OpenAPIObject) {
 function fixTag(data: OpenAPIObject) {
   const tags = data.tags;
   const paths = data.paths;
+
+  const finalNameMap: { [name: string]: string } = {};
+
   Object.keys(paths).forEach(path => {
     const pathItemObject: PathItemObject = paths[path];
     Object.keys(pathItemObject).forEach(method => {
-      const tagNames: string[] = pathItemObject[method].tags;
-      if (!tagNames.length) {
-        tagNames.push('Default');
+      const operation: OperationObject = pathItemObject[method];
+      if (!Array.isArray(operation.tags) || !operation.tags.length) {
+        operation.tags = ['Default'];
       }
-      tagNames.forEach(tagName => {
-        if (!tags.find(t => t.name === tagName)) {
-          tags.push({
+      operation.tags = operation.tags.map(tagName => {
+        if (finalNameMap[tagName]) {
+          return finalNameMap[tagName];
+        }
+        let tagObject: TagObject = tags.find(t => t.name === tagName);
+        if (!tagObject) {
+          tagObject = {
             name: tagName,
-            description: tagName,
-          });
+            description: tagName
+          };
+          tags.push(tagObject);
+        }
+        if (!testTypeNameValid(tagObject.name)) {
+          const description = tagObject.description.replace(/ /g, '');
+          const newName = testTypeNameValid(description)
+            ? description.replace(/ /g, '')
+            : 'UNKNOWN';
+          tagObject.description = tagObject.name;
+          return (tagObject.name = finalNameMap[tagObject.name] = newName);
         }
       });
     });
@@ -36,7 +58,9 @@ function fixOperationId(data: OpenAPIObject) {
       const operationObject: OperationObject = pathItem[method];
       const functionName = operationObject.operationId;
       if (tmpFunctionRD[functionName]) {
-        operationObject.operationId = `${functionName}_${tmpFunctionRD[functionName]++}`;
+        operationObject.operationId = `${functionName}_${tmpFunctionRD[
+          functionName
+        ]++}`;
       } else {
         tmpFunctionRD[functionName] = 1;
       }
