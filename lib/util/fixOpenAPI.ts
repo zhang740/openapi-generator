@@ -8,7 +8,6 @@ import { testTypeNameValid } from './const';
 
 export function fixOpenAPI(data: OpenAPIObject) {
   fixTag(data);
-  fixOperationId(data);
 }
 
 function fixTag(data: OpenAPIObject) {
@@ -50,25 +49,6 @@ function fixTag(data: OpenAPIObject) {
           return (finalNameMap[tagObject.name] = tagObject.name);
         }
       });
-    });
-  });
-}
-
-function fixOperationId(data: OpenAPIObject) {
-  const tmpFunctionRD: { [key: string]: number } = {};
-  const paths = data.paths;
-  Object.keys(paths).forEach(path => {
-    const pathItem: PathItemObject = paths[path];
-    Object.keys(pathItem).forEach(method => {
-      const operationObject: OperationObject = pathItem[method];
-      const functionName = operationObject.operationId;
-      if (tmpFunctionRD[functionName]) {
-        operationObject.operationId = `${functionName}_${tmpFunctionRD[
-          functionName
-        ]++}`;
-      } else {
-        tmpFunctionRD[functionName] = 1;
-      }
     });
   });
 }
