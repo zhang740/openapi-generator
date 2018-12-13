@@ -1,3 +1,7 @@
+# 0.1.23 / 2018-12-13
+
+- update: remove fixOperationId from fixOpenAPI state.
+
 # 0.1.22 / 2018-12-13
 
 - fix: fixTag when tag.name is valid.
