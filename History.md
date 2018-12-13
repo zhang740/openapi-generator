@@ -1,3 +1,7 @@
+# 0.1.22 / 2018-12-13
+
+- fix: fixTag when tag.name is valid.
+
 # 0.1.21 / 2018-12-12
 
 - update: fixTagName for type.
