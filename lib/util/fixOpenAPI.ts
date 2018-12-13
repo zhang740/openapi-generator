@@ -37,12 +37,17 @@ function fixTag(data: OpenAPIObject) {
           tags.push(tagObject);
         }
         if (!testTypeNameValid(tagObject.name)) {
-          const description = tagObject.description.replace(/ /g, '');
+          const description = (tagObject.description || tagObject.name).replace(
+            / /g,
+            ''
+          );
           const newName = testTypeNameValid(description)
-            ? description.replace(/ /g, '')
+            ? description
             : 'UNKNOWN';
           tagObject.description = tagObject.name;
           return (tagObject.name = finalNameMap[tagObject.name] = newName);
+        } else {
+          return (finalNameMap[tagObject.name] = tagObject.name);
         }
       });
     });
