@@ -3,7 +3,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as nunjucks from 'nunjucks';
 import {
-  OpenAPIObject, SchemaObject, ReferenceObject, ParameterObject, RequestBodyObject, ContentObject, ResponseObject, ResponsesObject, OperationObject, PathItemObject,
+  OpenAPIObject,
+  SchemaObject,
+  ReferenceObject,
+  ParameterObject,
+  RequestBodyObject,
+  ContentObject,
+  ResponseObject,
+  ResponsesObject,
+  OperationObject,
+  PathItemObject,
 } from 'openapi3-ts';
 import { CommonError } from './util';
 
@@ -47,10 +56,7 @@ export interface TagAPIDataType {
 export class ServiceGenerator {
   protected apiData: TagAPIDataType = {};
 
-  constructor(
-    protected config: GenConfig,
-    protected openAPIData: OpenAPIObject,
-  ) {
+  constructor(protected config: GenConfig, protected openAPIData: OpenAPIObject) {
     Object.keys(openAPIData.paths || {}).forEach(path => {
       const pathItem: PathItemObject = openAPIData.paths[path];
 
@@ -77,22 +83,23 @@ export class ServiceGenerator {
 
     if (this.config.type === 'ts') {
       debug('[GenSDK] gen interface.');
-      this.genFileFromTemplate(
-        'typings.d.ts',
-        'interface',
-        {
-          namespace: this.config.namespace,
-          list: this.getInterfaceTP()
-        }
-      );
+      this.genFileFromTemplate('typings.d.ts', 'interface', {
+        namespace: this.config.namespace,
+        list: this.getInterfaceTP(),
+      });
     }
     this.getServiceTP()
       .filter(tp => {
-        tp.list = tp.list.filter(item =>
-          !this.config.filter || this.config.filter.some(f => {
-            return f instanceof RegExp ? f.test(item.path) :
-              typeof f === 'function' ? f(item) : true;
-          })
+        tp.list = tp.list.filter(
+          item =>
+            !this.config.filter ||
+            this.config.filter.some(f => {
+              return f instanceof RegExp
+                ? f.test(item.path)
+                : typeof f === 'function'
+                ? f(item)
+                : true;
+            })
         );
         return tp.list.length;
       })
@@ -104,7 +111,7 @@ export class ServiceGenerator {
           {
             namespace: this.config.namespace,
             ...tp,
-          },
+          }
         );
       });
   }
@@ -115,11 +122,14 @@ export class ServiceGenerator {
       const reqLibPath = path.join(this.config.sdkDir, `base.${this.config.type}`);
 
       if (!fs.existsSync(reqLibPath)) {
-        fs.writeFileSync(reqLibPath, nunjucks.renderString(
-          fs.readFileSync(path.join(
-            __dirname, 'template', 'base.njk',
-          ), 'utf8'), { genType: this.config.type }
-        ), 'utf8');
+        fs.writeFileSync(
+          reqLibPath,
+          nunjucks.renderString(
+            fs.readFileSync(path.join(__dirname, 'template', 'base.njk'), 'utf8'),
+            { genType: this.config.type }
+          ),
+          'utf8'
+        );
       }
     }
   }
@@ -139,16 +149,18 @@ export class ServiceGenerator {
           return {
             typeName,
             type: this.getType(props),
-            props: props.properties && Object.keys(props.properties).map(propName => {
-              const propSchema: SchemaObject = props.properties[propName];
-              return {
-                ...propSchema,
-                name: propName,
-                type: this.getType(propSchema),
-                desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
-                required: requiredPropKeys.some(key => key === propName)
-              };
-            }),
+            props:
+              props.properties &&
+              Object.keys(props.properties).map(propName => {
+                const propSchema: SchemaObject = props.properties[propName];
+                return {
+                  ...propSchema,
+                  name: propName,
+                  type: this.getType(propSchema),
+                  desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
+                  required: requiredPropKeys.some(key => key === propName),
+                };
+              }),
           };
         } catch (error) {
           console.warn('[GenSDK] gen service param error:', error);
@@ -175,8 +187,9 @@ export class ServiceGenerator {
             const body = this.getBodyTP(api.requestBody);
             const response = this.getResponseTP(api.responses);
 
-            let functionName = this.config.hook.customFunctionName ?
-              this.config.hook.customFunctionName(api) : api.operationId;
+            let functionName = this.config.hook.customFunctionName
+              ? this.config.hook.customFunctionName(api)
+              : api.operationId;
 
             if (tmpFunctionRD[functionName]) {
               functionName = `${functionName}_${tmpFunctionRD[functionName]++}`;
@@ -187,7 +200,7 @@ export class ServiceGenerator {
             return {
               ...api,
               functionName,
-              path: api.path.replace(/{([^}]*)}/gi, ({ }, str) => {
+              path: api.path.replace(/{([^}]*)}/gi, ({}, str) => {
                 return `\$\{${str}\}`;
               }),
               method: api.method,
@@ -203,8 +216,9 @@ export class ServiceGenerator {
           }
         });
 
-      const className = this.config.hook.customClassName ?
-        this.config.hook.customClassName(tag) : this.toCamelCase(tag);
+      const className = this.config.hook.customClassName
+        ? this.config.hook.customClassName(tag)
+        : this.toCamelCase(tag);
       return {
         genType: this.config.type,
         className,
@@ -233,9 +247,9 @@ export class ServiceGenerator {
           key: p,
           schema: {
             ...schema.properties[p],
-            type: this.getType(schema.properties[p], this.config.namespace)
-          }
-        }))
+            type: this.getType(schema.properties[p], this.config.namespace),
+          },
+        })),
       };
     }
     return {
@@ -297,17 +311,14 @@ export class ServiceGenerator {
   }
 
   protected writeFile(fileName: string, content: string) {
-    const filePath = path.join(
-      this.config.sdkDir,
-      fileName,
-    );
+    const filePath = path.join(this.config.sdkDir, fileName);
     this.mkdir(path.dirname(filePath));
     fs.writeFileSync(filePath, content, { encoding: 'utf8' });
   }
 
   protected getTemplate(type: 'interface' | 'service') {
-    const configFilePath = type === 'interface' ? this.config.interfaceTemplatePath :
-      this.config.templatePath;
+    const configFilePath =
+      type === 'interface' ? this.config.interfaceTemplatePath : this.config.templatePath;
     try {
       if (configFilePath) {
         this.mkdir(path.dirname(configFilePath));
@@ -316,10 +327,14 @@ export class ServiceGenerator {
         }
       }
 
-      const fileContent = fs.readFileSync(path.join(
-        __dirname, 'template',
-        type === 'service' ? `${type}.${this.config.serviceType}.njk` : `${type}.njk`,
-      ), 'utf8');
+      const fileContent = fs.readFileSync(
+        path.join(
+          __dirname,
+          'template',
+          type === 'service' ? `${type}.${this.config.serviceType}.njk` : `${type}.njk`
+        ),
+        'utf8'
+      );
       if (configFilePath) {
         fs.writeFileSync(configFilePath, fileContent, 'utf8');
       }
@@ -382,7 +397,7 @@ export class ServiceGenerator {
   }
 
   protected toCamelCase(s: string) {
-    return s.replace(/_(\w)/g, function (_all, letter) {
+    return s.replace(/_(\w)/g, function(_all, letter) {
       return letter.toUpperCase();
     });
   }
@@ -445,20 +460,18 @@ export class ServiceGenerator {
 
       /** 以下非标准 */
       case 'enum':
-        return Array.isArray(schemaObject.enum) ?
-          Array.from(
-            new Set(
-              schemaObject.enum.map(
-                v => typeof v === 'string' ?
-                  `"${v.replace(/"/g, '\"')}"` : this.getType(v)
+        return Array.isArray(schemaObject.enum)
+          ? Array.from(
+              new Set(
+                schemaObject.enum.map(v =>
+                  typeof v === 'string' ? `"${v.replace(/"/g, '"')}"` : this.getType(v)
+                )
               )
-            )
-          ).join(' | ')
+            ).join(' | ')
           : 'string';
 
       default:
         return 'any';
     }
   }
-
 }

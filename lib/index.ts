@@ -29,21 +29,23 @@ export async function genSDK(cfg: string | CliConfig | CliConfig[]) {
     }
   });
 
-  return Promise.all(configs.map(cfg => {
-    cfg = {
-      ...new CliConfig,
-      ...cfg,
-    };
-    cfg.sdkDir = getAbsolutePath(cfg.sdkDir);
-    cfg.interfaceTemplatePath = getAbsolutePath(cfg.interfaceTemplatePath);
-    cfg.templatePath = getAbsolutePath(cfg.templatePath);
-    return genFromUrl(cfg);
-  }));
+  return Promise.all(
+    configs.map(cfg => {
+      cfg = {
+        ...new CliConfig(),
+        ...cfg,
+      };
+      cfg.sdkDir = getAbsolutePath(cfg.sdkDir);
+      cfg.interfaceTemplatePath = getAbsolutePath(cfg.interfaceTemplatePath);
+      cfg.templatePath = getAbsolutePath(cfg.templatePath);
+      return genFromUrl(cfg);
+    })
+  );
 }
 
 export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   config = {
-    ...new CliConfig,
+    ...new CliConfig(),
     ...config,
   };
 
@@ -72,7 +74,7 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   }
 
   if (config.autoClear && fs.existsSync(config.sdkDir)) {
-    fs.readdirSync(config.sdkDir).forEach((file) => {
+    fs.readdirSync(config.sdkDir).forEach(file => {
       if (
         !['d.ts', '.ts', '.js'].some(ext => path.extname(file) === ext) ||
         (config.requestLib && file.startsWith('base.'))
@@ -87,11 +89,7 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
   }
 
   if (config.saveOpenAPIData) {
-    fs.writeFileSync(
-      path.join(config.sdkDir, 'oas.json'),
-      JSON.stringify(data, null, 2),
-      'utf8'
-    );
+    fs.writeFileSync(path.join(config.sdkDir, 'oas.json'), JSON.stringify(data, null, 2), 'utf8');
   }
 
   const generator = new ServiceGenerator(config, data);
@@ -115,9 +113,10 @@ export async function genFromUrl(config: CliConfig) {
 }
 
 function getAbsolutePath(filePath: string) {
-  return filePath ?
-    path.isAbsolute(filePath) ?
-      filePath : path.join(process.cwd(), filePath)
+  return filePath
+    ? path.isAbsolute(filePath)
+      ? filePath
+      : path.join(process.cwd(), filePath)
     : filePath;
 }
 

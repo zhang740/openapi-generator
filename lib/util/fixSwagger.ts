@@ -34,9 +34,7 @@ function fixRefName(data: any) {
   Object.keys(refMap).forEach(key => {
     if (!testTypeNameValid(key)) {
       let newName = key.replace(/[^a-zA-Z0-9_]/g, '_');
-      newName = data.definitions[newName]
-        ? `${renameTypePrefix}${count}`
-        : newName;
+      newName = data.definitions[newName] ? `${renameTypePrefix}${count}` : newName;
 
       data.definitions[newName] = data.definitions[key];
       delete data.definitions[key];
@@ -65,7 +63,7 @@ function fixRequestBody(data: any) {
               bodyParams.forEach(p => {
                 properties[p.name] = {
                   description: p.description,
-                  ...p.schema
+                  ...p.schema,
                 };
               });
 
@@ -79,11 +77,9 @@ function fixRequestBody(data: any) {
                   required: true,
                   schema: {
                     type: 'object',
-                    required: bodyParams
-                      .filter(p => p.required)
-                      .map(p => p.name),
-                    properties
-                  }
+                    required: bodyParams.filter(p => p.required).map(p => p.name),
+                    properties,
+                  },
                 });
             }
             break;

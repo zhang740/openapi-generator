@@ -1,9 +1,4 @@
-import {
-  OpenAPIObject,
-  PathItemObject,
-  OperationObject,
-  TagObject
-} from 'openapi3-ts';
+import { OpenAPIObject, PathItemObject, OperationObject, TagObject } from 'openapi3-ts';
 import { testTypeNameValid } from './const';
 
 export function fixOpenAPI(data: OpenAPIObject) {
@@ -31,18 +26,13 @@ function fixTag(data: OpenAPIObject) {
         if (!tagObject) {
           tagObject = {
             name: tagName,
-            description: tagName
+            description: tagName,
           };
           tags.push(tagObject);
         }
         if (!testTypeNameValid(tagObject.name)) {
-          const description = (tagObject.description || tagObject.name).replace(
-            / /g,
-            ''
-          );
-          const newName = testTypeNameValid(description)
-            ? description
-            : 'UNKNOWN';
+          const description = (tagObject.description || tagObject.name).replace(/ /g, '');
+          const newName = testTypeNameValid(description) ? description : 'UNKNOWN';
           tagObject.description = tagObject.name;
           return (tagObject.name = finalNameMap[tagObject.name] = newName);
         } else {

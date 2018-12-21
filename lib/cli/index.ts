@@ -12,7 +12,11 @@ function addCommonParam(command: program.Command) {
     .option('-d, --sdkDir <sdkDir>', 'sdkDir, default: process.cwd()/service')
     .option('-t, --templatePath <templatePath>', 'templatePath')
     .option('-t, --type <type>', 'ts/js, default ts', /^(ts|js)$/i)
-    .option('-c, --camelCase <camelCase>', 'filename style, true 为大驼峰，lower 为小驼峰', /^(true|lower)$/i);
+    .option(
+      '-c, --camelCase <camelCase>',
+      'filename style, true 为大驼峰，lower 为小驼峰',
+      /^(true|lower)$/i
+    );
 }
 
 const defaultOpt: CliConfig = {
@@ -23,7 +27,7 @@ const defaultOpt: CliConfig = {
 addCommonParam(program)
   .command('url <url>')
   .description('swagger2/oas3 json data url')
-  .action(function (url, opt) {
+  .action(function(url, opt) {
     const { sdkDir, type, camelCase, templatePath } = opt;
     if (!url) {
       console.error('[GenSDK] err NEED Url');
@@ -43,7 +47,7 @@ addCommonParam(program)
 addCommonParam(program)
   .command('data <filePath>')
   .description('swagger2/oas3 json data file')
-  .action(function (filePath, opt) {
+  .action(function(filePath, opt) {
     filePath = !path.isAbsolute(filePath) ? path.join(process.cwd(), filePath) : filePath;
 
     const { sdkDir, type, camelCase, templatePath } = opt;
@@ -57,13 +61,16 @@ addCommonParam(program)
     } catch (error) {
       console.error('[GenSDK] file load fail.', error);
     }
-    genFromData({
-      ...defaultOpt,
-      sdkDir: sdkDir || defaultOpt.sdkDir,
-      templatePath,
-      type: type || defaultOpt.type,
-      camelCase: camelCase === 'true' ? true : camelCase,
-    }, data)
+    genFromData(
+      {
+        ...defaultOpt,
+        sdkDir: sdkDir || defaultOpt.sdkDir,
+        templatePath,
+        type: type || defaultOpt.type,
+        camelCase: camelCase === 'true' ? true : camelCase,
+      },
+      data
+    )
       .then(_ => process.exit(0))
       .catch(error => console.log('[GenSDK] err:\n', error));
   });
@@ -71,7 +78,7 @@ addCommonParam(program)
 program
   .command('config <cfgPath>')
   .description('config path')
-  .action(function (cfgPath) {
+  .action(function(cfgPath) {
     if (!cfgPath) {
       console.error('[GenSDK] err NEED config file path');
       return;
@@ -82,11 +89,9 @@ program
       .catch(error => console.log('[GenSDK] err:\n', error));
   });
 
-program
-  .command('*')
-  .action(function () {
-    program.help();
-  });
+program.command('*').action(function() {
+  program.help();
+});
 
 program.parse(process.argv);
 

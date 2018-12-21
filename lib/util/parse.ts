@@ -15,7 +15,6 @@ export function resolveRef(rootData: OpenAPIObject, refObject: ReferenceObject |
     if (refObject.$ref) {
       const refPaths = refObject.$ref.split('/');
       if (refPaths[0] === '#') {
-
         refPaths.shift();
         let obj: any = rootData;
         refPaths.forEach((node: any) => {
@@ -28,7 +27,7 @@ export function resolveRef(rootData: OpenAPIObject, refObject: ReferenceObject |
       }
     }
 
-    Object.keys(result).forEach((key) => {
+    Object.keys(result).forEach(key => {
       if (typeof result[key] === 'object') {
         result[key] = resolveRef(rootData, result[key] as ReferenceObject);
       }
