@@ -1,3 +1,7 @@
+# 0.1.24 / 2018-12-24
+
+- update: literal type generate for response type.
+
 # 0.1.23 / 2018-12-13
 
 - update: remove fixOperationId from fixOpenAPI state.
