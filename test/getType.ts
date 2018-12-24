@@ -45,3 +45,26 @@ test('array, base type', t => {
 test('array, degrade', t => {
   t.deepEqual(gen.getType({ type: 'array' }), 'any[]');
 });
+
+test('oneOf', t => {
+  t.deepEqual(
+    gen.getType({
+      type: 'object',
+      oneOf: [{ type: 'string' }, { type: 'number' }],
+    }),
+    `string | number`
+  );
+});
+
+test('properties', t => {
+  t.deepEqual(
+    gen.getType({
+      type: 'object',
+      properties: {
+        a: { type: 'string' },
+        b: { type: 'number' },
+      },
+    }),
+    `{ a: string; b: number; }`
+  );
+});
