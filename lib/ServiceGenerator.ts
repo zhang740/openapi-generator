@@ -471,6 +471,20 @@ export class ServiceGenerator {
           : 'string';
 
       default:
+        if (schemaObject.oneOf && schemaObject.oneOf.length) {
+          return schemaObject.oneOf.map(item => this.getType(item, namespace)).join(' | ');
+        }
+        if (schemaObject.properties) {
+          return `{ ${Object.keys(schemaObject.properties)
+            .map(prop => {
+              const propSchema: SchemaObject = schemaObject.properties[prop];
+              if (propSchema.$ref) {
+                return this.getType(propSchema, namespace);
+              }
+              return `${prop}: ${this.getType(schemaObject.properties[prop], namespace)}; `;
+            })
+            .join('')}}`;
+        }
         return 'any';
     }
   }
