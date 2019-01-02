@@ -1,3 +1,7 @@
+# 0.1.25 / 2019-01-02
+
+- update: exit -1 when err.
+
 # 0.1.24 / 2018-12-24
 
 - update: literal type generate for response type.
