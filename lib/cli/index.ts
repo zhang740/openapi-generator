@@ -60,6 +60,7 @@ addCommonParam(program)
       data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     } catch (error) {
       console.error('[GenSDK] file load fail.', error);
+      process.exit(-1);
     }
     genFromData(
       {
@@ -86,7 +87,10 @@ program
     cfgPath = path.isAbsolute(cfgPath) ? cfgPath : path.join(process.cwd(), cfgPath);
     genSDK(cfgPath)
       .then(_ => process.exit(0))
-      .catch(error => console.log('[GenSDK] err:\n', error));
+      .catch(error => {
+        console.log('[GenSDK] err:\n', error);
+        process.exit(-1);
+      });
   });
 
 program.command('*').action(function() {

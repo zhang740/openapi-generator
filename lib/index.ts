@@ -109,6 +109,7 @@ export async function genFromUrl(config: CliConfig) {
     return genFromData(config, data);
   } catch (error) {
     console.warn(config.api, error);
+    throw error;
   }
 }
 
