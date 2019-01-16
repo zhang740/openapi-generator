@@ -110,7 +110,7 @@ const checkOtherCode = res => {
 };
 
 const beforeSend = newOptions => {
-  if (newOptions.method === 'POST' || newOptions.method === 'PUT') {
+  if (newOptions.method !== 'GET') {
     newOptions.headers = {
       Accept: 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -179,7 +179,8 @@ const request = (url, options{{ "?: IOptions" if genType === "ts" }}, configs = 
   let newOptions = {
     method: 'GET',
     credentials: 'same-origin',
-    headers: options.headers || {},
+    ...options,
+    headers: options.headers || { Accept: 'application/json' },
     data: options.body || options.params || options.data,
   };
 
