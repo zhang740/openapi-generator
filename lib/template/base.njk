@@ -112,7 +112,6 @@ const checkOtherCode = res => {
 const beforeSend = newOptions => {
   if (newOptions.method === 'POST' || newOptions.method === 'PUT') {
     newOptions.headers = {
-      Accept: 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded',
       ...newOptions.headers,
     };
@@ -179,8 +178,9 @@ const request = (url, options{{ "?: IOptions" if genType === "ts" }}, configs = 
   let newOptions = {
     method: 'GET',
     credentials: 'same-origin',
-    headers: options.headers || {},
-    data: options.body || options.params || options.data,
+    ...(options || {}),
+    headers: { Accept: 'application/json', options.headers && ...options.headers, }, // 推荐默认 'application/json' 传参
+    data: options.body || options.params || options.data, // 将各种 method 的数据传递都统一放到 data 字段去处理数据，以支持 GET 方法时也可以写成 request(url, { params: data }) 这样的方式
   };
 
   const newConfigs = {
