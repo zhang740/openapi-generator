@@ -1,3 +1,7 @@
+# 0.1.26 / 2019-01-18
+
+- Update base.njk (#2)
+
 # 0.1.25 / 2019-01-02
 
 - update: exit -1 when err.
