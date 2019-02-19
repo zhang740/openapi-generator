@@ -1,3 +1,7 @@
+# 0.1.28 / 2019-02-19
+
+- fix: schemaObject.properties parse.
+
 # 0.1.26 / 2019-01-18
 
 - Update base.njk (#2)
