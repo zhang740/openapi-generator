@@ -477,10 +477,6 @@ export class ServiceGenerator {
         if (schemaObject.properties) {
           return `{ ${Object.keys(schemaObject.properties)
             .map(prop => {
-              const propSchema: SchemaObject = schemaObject.properties[prop];
-              if (propSchema.$ref) {
-                return this.getType(propSchema, namespace);
-              }
               return `${prop}: ${this.getType(schemaObject.properties[prop], namespace)}; `;
             })
             .join('')}}`;
