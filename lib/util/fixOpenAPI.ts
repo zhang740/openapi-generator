@@ -3,12 +3,11 @@ import { testTypeNameValid } from './const';
 
 export function fixOpenAPI(data: OpenAPIObject) {
   fixTag(data);
+  fixUniqueTagOperation(data);
 }
 
 function fixTag(data: OpenAPIObject) {
-  const tags = data.tags;
-  const paths = data.paths;
-
+  const { tags, paths } = data;
   const finalNameMap: { [name: string]: string } = {};
 
   Object.keys(paths).forEach(path => {
@@ -37,6 +36,34 @@ function fixTag(data: OpenAPIObject) {
           return (tagObject.name = finalNameMap[tagObject.name] = newName);
         } else {
           return (finalNameMap[tagObject.name] = tagObject.name);
+        }
+      });
+    });
+  });
+}
+
+function fixUniqueTagOperation(data: OpenAPIObject) {
+  const { paths } = data;
+  const tagOpNameCounter: { [key: string]: number } = {};
+
+  Object.keys(paths).forEach(path => {
+    const pathItemObject: PathItemObject = paths[path];
+    [
+      pathItemObject.get,
+      pathItemObject.put,
+      pathItemObject.post,
+      pathItemObject.delete,
+      pathItemObject.options,
+      pathItemObject.head,
+      pathItemObject.patch,
+      pathItemObject.trace,
+    ].filter(o => o).forEach(operation => {
+      operation.tags.forEach(tag => {
+        const key = `${tag}.${operation.operationId}`;
+        if (tagOpNameCounter[key]) {
+          operation.operationId += `_${tagOpNameCounter[key]++}`;
+        } else {
+          tagOpNameCounter[key] = 1;
         }
       });
     });
