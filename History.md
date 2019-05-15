@@ -1,3 +1,7 @@
+# 0.1.29 / 2019-05-15
+
+- update: autofix OAS for unique tag+operation.
+
 # 0.1.28 / 2019-02-19
 
 - fix: schemaObject.properties parse.
