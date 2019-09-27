@@ -30,7 +30,9 @@ function fixTag(data: OpenAPIObject) {
           tags.push(tagObject);
         }
         if (!testTypeNameValid(tagObject.name)) {
-          const description = (tagObject.description || tagObject.name).replace(/ /g, '');
+          const description = (tagObject.description || tagObject.name)
+            .replace(/ /g, '')
+            .replace(/[\-\,\.\/]/g, '_');
           const newName = testTypeNameValid(description) ? description : 'UNKNOWN';
           tagObject.description = tagObject.name;
           return (tagObject.name = finalNameMap[tagObject.name] = newName);
@@ -57,15 +59,17 @@ function fixUniqueTagOperation(data: OpenAPIObject) {
       pathItemObject.head,
       pathItemObject.patch,
       pathItemObject.trace,
-    ].filter(o => o).forEach(operation => {
-      operation.tags.forEach(tag => {
-        const key = `${tag}.${operation.operationId}`;
-        if (tagOpNameCounter[key]) {
-          operation.operationId += `_${tagOpNameCounter[key]++}`;
-        } else {
-          tagOpNameCounter[key] = 1;
-        }
+    ]
+      .filter(o => o)
+      .forEach(operation => {
+        operation.tags.forEach(tag => {
+          const key = `${tag}.${operation.operationId}`;
+          if (tagOpNameCounter[key]) {
+            operation.operationId += `_${tagOpNameCounter[key]++}`;
+          } else {
+            tagOpNameCounter[key] = 1;
+          }
+        });
       });
-    });
   });
 }

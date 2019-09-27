@@ -95,6 +95,32 @@
           }
         }
       }
+    },
+    "/repeat": {
+      "get": {
+        "tags": [
+          "xxx-controller"
+        ],
+        "operationId": "queryXXX"
+      },
+      "put": {
+        "tags": [
+          "xxx-controller"
+        ],
+        "operationId": "queryXXX"
+      },
+      "delete": {
+        "tags": [
+          "xxx-controller"
+        ],
+        "operationId": "queryXXX"
+      },
+      "patch": {
+        "tags": [
+          "xxx-controller"
+        ],
+        "operationId": "queryXXX"
+      }
     }
   },
   "servers": [
