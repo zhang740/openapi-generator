@@ -1,3 +1,8 @@
+# 0.1.31 / 2019-11-29
+
+- update: support additionalProperties.
+- fix: base.njk
+
 # 0.1.29 / 2019-05-15
 
 - update: autofix OAS for unique tag+operation.
