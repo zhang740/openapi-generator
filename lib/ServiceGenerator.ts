@@ -146,24 +146,43 @@ export class ServiceGenerator {
 
           const requiredPropKeys = props.required || [];
 
+          const propsData =
+            props.properties &&
+            Object.keys(props.properties).map(propName => {
+              const propSchema: SchemaObject = props.properties[propName];
+              return {
+                ...propSchema,
+                name: propName,
+                type: this.getType(propSchema),
+                desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
+                required: requiredPropKeys.some(key => key === propName),
+              };
+            });
+          if (props.additionalProperties) {
+            if (props.additionalProperties === true) {
+              propsData.push({
+                name: '[key: string]',
+                type: 'any',
+                desc: '',
+                required: true,
+              });
+            } else {
+              propsData.push({
+                name: '[key: string]',
+                type: this.getType(props.additionalProperties),
+                desc: (props.additionalProperties as SchemaObject).description,
+                required: true,
+              });
+            }
+          }
+
           return {
             typeName,
             type: this.getType(props),
-            props:
-              props.properties &&
-              Object.keys(props.properties).map(propName => {
-                const propSchema: SchemaObject = props.properties[propName];
-                return {
-                  ...propSchema,
-                  name: propName,
-                  type: this.getType(propSchema),
-                  desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
-                  required: requiredPropKeys.some(key => key === propName),
-                };
-              }),
+            props: propsData,
           };
         } catch (error) {
-          console.warn('[GenSDK] gen service param error:', error);
+          console.warn('[GenSDK] gen interface param error:', error);
           throw error;
         }
       });
@@ -474,14 +493,23 @@ export class ServiceGenerator {
         if (schemaObject.oneOf && schemaObject.oneOf.length) {
           return schemaObject.oneOf.map(item => this.getType(item, namespace)).join(' | ');
         }
+        const props: string[] = [];
         if (schemaObject.properties) {
-          return `{ ${Object.keys(schemaObject.properties)
-            .map(prop => {
-              return `${prop}: ${this.getType(schemaObject.properties[prop], namespace)}; `;
-            })
-            .join('')}}`;
+          Object.keys(schemaObject.properties).forEach(prop => {
+            props.push(`${prop}: ${this.getType(schemaObject.properties[prop], namespace)};`);
+          });
         }
-        return 'any';
+        if (schemaObject.additionalProperties) {
+          const indexType = schemaObject.additionalProperties
+            ? schemaObject.additionalProperties === true
+              ? `{ type: 'any'; }`
+              : this.getType(schemaObject.additionalProperties, namespace)
+            : undefined;
+          if (indexType) {
+            props.push(`[key: string]: ${indexType};`);
+          }
+        }
+        return props.length ? `{ ${props.join(' ')} }` : 'any';
     }
   }
 }
