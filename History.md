@@ -1,3 +1,7 @@
+# 0.1.32 / 2019-12-13
+
+- fix: properties is null.
+
 # 0.1.31 / 2019-11-29
 
 - update: support additionalProperties.
