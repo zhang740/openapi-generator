@@ -146,18 +146,18 @@ export class ServiceGenerator {
 
           const requiredPropKeys = props.required || [];
 
-          const propsData =
-            props.properties &&
-            Object.keys(props.properties).map(propName => {
-              const propSchema: SchemaObject = props.properties[propName];
-              return {
-                ...propSchema,
-                name: propName,
-                type: this.getType(propSchema),
-                desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
-                required: requiredPropKeys.some(key => key === propName),
-              };
-            });
+          const propsData = props.properties
+            ? Object.keys(props.properties).map(propName => {
+                const propSchema: SchemaObject = props.properties[propName];
+                return {
+                  ...propSchema,
+                  name: propName,
+                  type: this.getType(propSchema),
+                  desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
+                  required: requiredPropKeys.some(key => key === propName),
+                };
+              })
+            : [];
           if (props.additionalProperties) {
             if (props.additionalProperties === true) {
               propsData.push({
