@@ -65,11 +65,11 @@ export class {{ className }} {
       {% if prop.schema.description -%}
       /** {{ prop.schema.description }} */
       {% endif -%}
-      {{ prop.key }}{{ "?" if not prop.schema.requird }}: {{ prop.schema.type }},
+      {{ prop.key }}{{ "?" if not prop.schema.requird }}: {{ prop.schema.type | safe }},
       {%- endfor %}
     }
     {%- else -%}
-    {{ api.body.type }}
+    {{ api.body.type | safe }}
     {%- endif -%}
     {%- endif -%}
   {%- endif %}
