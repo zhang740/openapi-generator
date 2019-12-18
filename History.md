@@ -1,3 +1,7 @@
+# 0.1.34 / 2019-12-18
+
+- dep: upgrade swagger2openapi.
+
 # 0.1.33 / 2019-12-17
 
 - update: njk template.
