@@ -71,6 +71,9 @@
             "type": "object",
             "additionalProperties": {
               "type": "string"
+            },
+            "example": {
+              "additionalProperties": null
             }
           },
           "errorCode": {
