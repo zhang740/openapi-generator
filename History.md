@@ -1,3 +1,7 @@
+# 0.1.35 / 2020-04-08
+
+- 兼容 swagger 注解中添加 example，并且 example 值可能是 null 等的场景 (#3)
+
 # 0.1.34 / 2019-12-18
 
 - dep: upgrade swagger2openapi.
