@@ -1,3 +1,7 @@
+# 0.1.36 / 2020-04-16
+
+- fix: union array type.
+
 # 0.1.35 / 2020-04-08
 
 - 兼容 swagger 注解中添加 example，并且 example 值可能是 null 等的场景 (#3)
