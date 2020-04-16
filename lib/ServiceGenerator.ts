@@ -416,7 +416,7 @@ export class ServiceGenerator {
   }
 
   protected toCamelCase(s: string) {
-    return s.replace(/_(\w)/g, function(_all, letter) {
+    return s.replace(/_(\w)/g, function (_all, letter) {
       return letter.toUpperCase();
     });
   }
@@ -475,7 +475,8 @@ export class ServiceGenerator {
         return 'boolean';
 
       case 'array':
-        return `${this.getType(schemaObject.items, namespace)}[]`;
+        const str = this.getType(schemaObject.items, namespace);
+        return `${['|', '&'].some(sep => str.includes(sep)) ? `(${str})` : str}[]`;
 
       /** 以下非标准 */
       case 'enum':
