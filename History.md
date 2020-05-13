@@ -1,3 +1,7 @@
+# 0.1.37 / 2020-05-13
+
+- upgrade dep: typescript.
+
 # 0.1.36 / 2020-04-16
 
 - fix: union array type.

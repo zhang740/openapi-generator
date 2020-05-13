@@ -1,6 +1,6 @@
 {
   "name": "openapi-generator",
-  "version": "0.1.36",
+  "version": "0.1.37",
   "description": "",
   "main": "./lib/index.js",
   "typings": "./lib/index.d.ts",
@@ -61,7 +61,7 @@
     "nyc": "^12.0.2",
     "rimraf": "^2.6.2",
     "tslint": "5.11.0",
-    "typescript": "~3.0.1",
+    "typescript": "^3.0.1",
     "webpack": "^4.17.0"
   }
 }
