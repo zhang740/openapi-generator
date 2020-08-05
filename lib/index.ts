@@ -98,7 +98,17 @@ export async function genFromData(config: CliConfig, data: OpenAPIObject) {
 
 export async function convertSwagger2OpenAPI(data: OpenAPIObject) {
   fixSwagger(data);
+  const tmp = data;
   data = await s2o(data);
+
+  // 每个path增加basePath前缀, 例如swagger api返回 basePath: '/newBasePath'
+  if (tmp.basePath && tmp.basePath !== '/') {
+    Object.keys(data.paths).forEach(i => {
+      data.paths[tmp.basePath + i] = data.paths[i];
+      delete data.paths[i];
+    });
+  }
+
   fixOpenAPI(data);
   return data;
 }
