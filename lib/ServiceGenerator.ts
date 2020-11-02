@@ -151,7 +151,7 @@ export class ServiceGenerator {
                 const propSchema: SchemaObject = props.properties[propName];
                 return {
                   ...propSchema,
-                  name: propName,
+                  name: propName.includes('-') ? `"${propName}"` : propName,
                   type: this.getType(propSchema),
                   desc: [propSchema.title, propSchema.description].filter(s => s).join(' '),
                   required: requiredPropKeys.some(key => key === propName),
