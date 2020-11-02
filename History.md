@@ -1,3 +1,7 @@
+# 0.1.39 / 2020-11-02
+
+- update: support "-" propsName.
+
 # 0.1.38 / 2020-11-02
 
 - update: props.
