@@ -497,7 +497,12 @@ export class ServiceGenerator {
         const props: string[] = [];
         if (schemaObject.properties) {
           Object.keys(schemaObject.properties).forEach(prop => {
-            props.push(`${prop}: ${this.getType(schemaObject.properties[prop], namespace)};`);
+            props.push(
+              `${prop.includes('-') ? `"${prop}"` : prop}: ${this.getType(
+                schemaObject.properties[prop],
+                namespace
+              )};`
+            );
           });
         }
         if (schemaObject.additionalProperties) {

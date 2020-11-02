@@ -63,8 +63,9 @@ test('properties', t => {
       properties: {
         a: { type: 'string' },
         b: { type: 'number' },
+        'c-x': { type: 'string' },
       },
     }),
-    `{ a: string; b: number; }`
+    `{ a: string; b: number; "c-x": string; }`
   );
 });
