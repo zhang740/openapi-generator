@@ -28,6 +28,10 @@ openapi-generator from swagger 2.0 or OpenAPI 3.0:
 
 `openapi-generator url http://xxx/v2/api-docs -c true`
 
+Default request timeout is 5000ms, customize timeout with `requestTimeout` env.
+
+`requestTimeout=10000 openapi-generator url http://xxx/v2/api-docs -c true`
+
 ## Use Config
 
 `openapi-generator config ./xxx.js` or `openapi-generator config ./xxx.json`
